@@ -1,0 +1,20 @@
+# Download the packages from repo
+vcpkg install <pkg>
+
+# To initialize the application
+cd <app_root>
+vcpkg new --application
+
+# To add packages
+cd <app_root>
+vcpkg add port <pkg>
+
+# To install the packages (required for cmake find_package)
+# This is actually ran in automatic if vscode is correctly set
+# Remember to set the preset "vcpkg" in vscode or use command "cmake --preset vcpkg .." when generating
+cd <app_root>
+vcpkg install
+
+# To configure cmake
+cd <app_root>/build
+cmake --preset=vcpkg -G "Ninja Multi-Config" ..

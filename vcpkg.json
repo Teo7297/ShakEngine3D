@@ -1,0 +1,25 @@
+{
+  "dependencies": [
+    "sdl3",
+    {
+      "name": "sdl3-image",
+      "features": [
+        "jpeg",
+        "png",
+        "tiff",
+        "webp"
+      ]
+    },
+    "sdl3-ttf",
+    "glew",
+    "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "sdl3-binding",
+        "sdl3-renderer-binding",
+        "sdlgpu3-binding"
+      ]
+    }
+  ]
+}
