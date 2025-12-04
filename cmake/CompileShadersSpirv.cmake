@@ -31,7 +31,7 @@ foreach(SHADER ${SHADERS})
     
     add_custom_command(
         OUTPUT ${OUTPUT_FILE}
-        COMMAND ${GLSLC_EXECUTABLE} ${SHADER} -o ${OUTPUT_FILE} || (exit 0) # Do not stop compilation on error
+        COMMAND ${GLSLC_EXECUTABLE} ${SHADER} -O -o ${OUTPUT_FILE} || (exit 0) # Do not stop compilation on error
         DEPENDS ${SHADER}
         COMMENT "Compiling shader: ${SHADER_NAME}"
     )

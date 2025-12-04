@@ -3,14 +3,33 @@
 #include <SDL3/SDL_main.h>
 #include <GL/glew.h>
 #include <SDL3/SDL_opengl.h>
+#include <glm/glm.hpp>
 #include <cmath>
 #include <vector>
 #include <fstream>
-#include <glm/glm.hpp>
+#include <iostream>
+
+void CheckOpenGLError(const char* stmt, const char* fname, int line)
+{
+    GLenum err = glGetError();
+    if(err != GL_NO_ERROR)
+    {
+        printf("OpenGL error %08x, at %s:%i - for %s\n", err, fname, line, stmt);
+        abort();
+    }
+}
+
+#ifdef _DEBUG
+#define GL_CHECK(stmt) do { \
+            stmt; \
+            CheckOpenGLError(#stmt, __FILE__, __LINE__); \
+        } while (0)
+#else
+#define GL_CHECK(stmt) stmt
+#endif
 
 typedef struct {
     SDL_Window* window;
-    SDL_Renderer* renderer;
     SDL_GLContext gl_context;
 } AppState;
 
@@ -28,90 +47,123 @@ static const struct {
 static GLuint VAO, VBO, EBO;
 static GLuint shaderProgram;
 
-/* Cube vertices with colors (position XYZ, color RGB) */
-static float vertices[] = {
-    // Front face (red)
-    -1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
-     1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
-     1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
-    -1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
-    // Back face (green)
-    -1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-    -1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-     1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-     1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-     // Top face (blue)
-     -1.0f,  1.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-     -1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-      1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-      1.0f,  1.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-      // Bottom face (yellow)
-      -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-       1.0f, -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-       1.0f, -1.0f,  1.0f,  1.0f, 1.0f, 0.0f,
-      -1.0f, -1.0f,  1.0f,  1.0f, 1.0f, 0.0f,
-      // Right face (magenta)
-       1.0f, -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
-       1.0f,  1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
-       1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-       1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-       // Left face (cyan)
-       -1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 1.0f,
-       -1.0f, -1.0f,  1.0f,  0.0f, 1.0f, 1.0f,
-       -1.0f,  1.0f,  1.0f,  0.0f, 1.0f, 1.0f,
-       -1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 1.0f
+static float vertices[] =
+{
+    -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+     0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
 };
 
-/* Indices for drawing the cube */
-static unsigned int indices[] = {
-    0,  1,  2,  2,  3,  0,   // Front
-    4,  5,  6,  6,  7,  4,   // Back
-    8,  9, 10, 10, 11,  8,   // Top
-   12, 13, 14, 14, 15, 12,   // Bottom
-   16, 17, 18, 18, 19, 16,   // Right
-   20, 21, 22, 22, 23, 20    // Left
+static unsigned int indices[] =
+{
+    0,1,2,0,3,1
 };
 
-/* Helper function to read SPIR-V binary file */
-static std::vector<uint32_t> readSpirvFile(const char* filename) {
-    std::ifstream file(filename, std::ios::binary | std::ios::ate);
-    if(!file.is_open()) {
-        SDL_Log("Failed to open shader file: %s", filename);
-        return {};
+static const char* frag = R"(
+#version 460 core
+
+layout(location = 0) in vec3 fragColor;
+
+layout(location = 0) out vec4 FragColor;
+
+void main()
+{
+    FragColor = vec4(fragColor, 1.0);
+}
+)";
+
+static const char* vert = R"(
+#version 460 core
+
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aColor;
+
+layout(location = 0) out vec3 fragColor;
+
+void main()
+{
+    gl_Position = vec4(aPos, 1.0);
+    fragColor = aColor;
+}
+)";
+
+void createShaderProgram()
+{
+    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vshader, 1, &vert, NULL); // vertex_shader_source is a GLchar* containing glsl shader source code
+    glCompileShader(vshader);
+
+    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fshader, 1, &frag, NULL); // fragment_shader_source is a GLchar* containing glsl shader source code
+    glCompileShader(fshader);
+
+    shaderProgram = glCreateProgram();
+
+    glBindAttribLocation(shaderProgram, 0, "aPos");
+
+    glAttachShader(shaderProgram, vshader);
+    glAttachShader(shaderProgram, fshader);
+    glLinkProgram(shaderProgram);
+
+    glDeleteShader(vshader);
+    glDeleteShader(fshader);
+}
+
+std::vector<char> readBinary(const char* filename)
+{
+    std::ifstream is(filename, std::ifstream::binary);
+    std::vector<char> buffer;
+    if(is)
+    {
+        is.seekg(0, is.end);
+        int length = is.tellg();
+        is.seekg(0, is.beg);
+
+        buffer.reserve(length);
+        buffer.resize(length);
+
+        is.read(buffer.data(), length);
+        is.close();
     }
-
-    size_t fileSize = (size_t)file.tellg();
-    std::vector<uint32_t> buffer(fileSize / sizeof(uint32_t));
-
-    file.seekg(0);
-    file.read((char*)buffer.data(), fileSize);
-    file.close();
 
     return buffer;
 }
 
-/* Helper function to compile shaders */
-static GLuint loadSpirvShader(GLenum type, const char* filename) {
-    auto spirv = readSpirvFile(filename);
-    if(spirv.empty()) {
-        return 0;
-    }
+void createShaderFromSpirv()
+{
+    auto vert = readBinary("../shaders/test.vert.spv");
+    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderBinary(1, &vshader, GL_SHADER_BINARY_FORMAT_SPIR_V_ARB, vert.data(), vert.size());
+    glSpecializeShader(vshader, "main", 0, NULL, NULL);
+    int vcompiled = 0;
+    glGetShaderiv(vshader, GL_COMPILE_STATUS, &vcompiled);
 
-    GLuint shader = glCreateShader(type);
-    glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, spirv.data(), spirv.size() * sizeof(uint32_t));
-    glSpecializeShader(shader, "main", 0, nullptr, nullptr);
+    auto frag = readBinary("../shaders/test.frag.spv");
+    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderBinary(1, &fshader, GL_SHADER_BINARY_FORMAT_SPIR_V_ARB, frag.data(), frag.size());
+    glSpecializeShader(fshader, "main", 0, NULL, NULL);
+    int fcompiled = 0;
+    glGetShaderiv(fshader, GL_COMPILE_STATUS, &fcompiled);
 
-    GLint success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if(!success) {
-        char infoLog[512];
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        SDL_Log("SPIR-V shader specialization failed (%s): %s", filename, infoLog);
-        glDeleteShader(shader);
-        return 0;
-    }
+    shaderProgram = glCreateProgram();
 
-    return shader;
+    glBindAttribLocation(shaderProgram, 0, "aPos");
+
+    if(vcompiled)
+        glAttachShader(shaderProgram, vshader);
+    else
+        std::cout << "v error\n";
+
+    if(fcompiled)
+        glAttachShader(shaderProgram, fshader);
+    else
+        std::cout << "f error\n";
+
+    glLinkProgram(shaderProgram);
+
+    glDeleteShader(vshader);
+    glDeleteShader(fshader);
 }
 
 /* This function runs once at startup. */
@@ -167,8 +219,11 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     /* Log OpenGL version */
-    SDL_Log("OpenGL Version: %s", glGetString(GL_VERSION));
-    SDL_Log("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    const GLubyte* glVersion, * glslVersion;
+    GL_CHECK(glVersion = glGetString(GL_VERSION));
+    GL_CHECK(glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION));
+    SDL_Log("OpenGL Version: %s", glVersion);
+    SDL_Log("GLSL Version: %s", glslVersion);
 
     /* Check for SPIR-V support */
     if(!GLEW_ARB_gl_spirv) {
@@ -176,19 +231,51 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    /* Load and compile SPIR-V shaders */
-    // const char* basePath = SDL_GetBasePath();
-    // char vertShaderPath[512];
-    // char fragShaderPath[512];
-    // SDL_snprintf(vertShaderPath, sizeof(vertShaderPath), "%s../shaders/test.vert.spv", basePath);
-    // SDL_snprintf(fragShaderPath, sizeof(fragShaderPath), "%s../shaders/test.frag.spv", basePath);
-    // SDL_free((void*)basePath);
+    // createShaderProgram();
+    createShaderFromSpirv();
 
-    // SDL_Log("Loading vertex shader from: %s", vertShaderPath);
-    // SDL_Log("Loading fragment shader from: %s", fragShaderPath);
+    // Create needed buffers for vertices rendering
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
-    // GLuint vertexShader = loadSpirvShader(GL_VERTEX_SHADER, vertShaderPath);
-    // GLuint fragmentShader = loadSpirvShader(GL_FRAGMENT_SHADER, fragShaderPath);
+    // VAO is our magic buffer. It will store the state of the next buffers!
+    glBindVertexArray(VAO);
+
+    // VBO, pass in the vertex data
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // Dynamic for animated verts
+
+    // Position attribute
+    glVertexAttribPointer(
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),
+        (void*)0
+    );
+    glEnableVertexAttribArray(0);
+
+    // Color attribute
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),
+        (void*)(3 * sizeof(float))
+    );
+    glEnableVertexAttribArray(1);
+
+    // EBO, pass in the indices data
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Unbind
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     return SDL_APP_CONTINUE;
 }
@@ -207,11 +294,23 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 {
     AppState* as = (AppState*)appstate;
 
-    glClearColor(0.2, 0.5, 0.1, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    GL_CHECK(glClearColor(0.0, 0.3, 0.5, 1.0));
+    GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
+
+    // Use shader program
+    GL_CHECK(glUseProgram(shaderProgram));
+
+    // Bind VAO and draw using indices
+    GL_CHECK(glBindVertexArray(VAO));
+    GL_CHECK(glDrawElements(GL_TRIANGLES, SDL_arraysize(indices), GL_UNSIGNED_INT, 0)); // last parameter is an offset when EBO is bound through VAO
+    GL_CHECK(glBindVertexArray(0));
 
     /* Swap buffers */
-    SDL_GL_SwapWindow(as->window);
+    if(!SDL_GL_SwapWindow(as->window))
+    {
+        SDL_Log("%s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
 
     return SDL_APP_CONTINUE;
 }
@@ -221,10 +320,30 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     AppState* as = (AppState*)appstate;
 
+    // Clean up OpenGL resources before destroying context
+    if(VAO) {
+        glDeleteVertexArrays(1, &VAO);
+        VAO = 0;
+    }
+    if(VBO) {
+        glDeleteBuffers(1, &VBO);
+        VBO = 0;
+    }
+    if(EBO) {
+        glDeleteBuffers(1, &EBO);
+        EBO = 0;
+    }
+    if(shaderProgram) {
+        glDeleteProgram(shaderProgram);
+        shaderProgram = 0;
+    }
+
     if(as->gl_context) {
         SDL_GL_DestroyContext(as->gl_context);
     }
     if(as->window) {
         SDL_DestroyWindow(as->window);
     }
+
+    SDL_free(as);
 }
