@@ -100,8 +100,6 @@ void createShaderProgram()
 
     shaderProgram = glCreateProgram();
 
-    glBindAttribLocation(shaderProgram, 0, "aPos");
-
     glAttachShader(shaderProgram, vshader);
     glAttachShader(shaderProgram, fshader);
     glLinkProgram(shaderProgram);
@@ -147,8 +145,6 @@ void createShaderFromSpirv()
     glGetShaderiv(fshader, GL_COMPILE_STATUS, &fcompiled);
 
     shaderProgram = glCreateProgram();
-
-    glBindAttribLocation(shaderProgram, 0, "aPos");
 
     if(vcompiled)
         glAttachShader(shaderProgram, vshader);
@@ -247,6 +243,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // Dynamic for animated verts
 
     // Position attribute
+    GLuint attribCount = 0;
     glVertexAttribPointer(
         0,
         3,
@@ -255,7 +252,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         6 * sizeof(float),
         (void*)0
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(attribCount++);
 
     // Color attribute
     glVertexAttribPointer(
@@ -266,7 +263,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         6 * sizeof(float),
         (void*)(3 * sizeof(float))
     );
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(attribCount++);
 
     // EBO, pass in the indices data
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
