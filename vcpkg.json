@@ -1,5 +1,7 @@
 {
   "dependencies": [
+    "glew",
+    "glm",
     "sdl3",
     {
       "name": "sdl3-image",
@@ -10,16 +12,6 @@
         "webp"
       ]
     },
-    "sdl3-ttf",
-    "glew",
-    "glm",
-    {
-      "name": "imgui",
-      "features": [
-        "sdl3-binding",
-        "sdl3-renderer-binding",
-        "sdlgpu3-binding"
-      ]
-    }
+    "sdl3-ttf"
   ]
 }

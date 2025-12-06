@@ -4,6 +4,9 @@
 #include <GL/glew.h>
 #include <SDL3/SDL_opengl.h>
 #include <glm/glm.hpp>
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_opengl3.h>
 #include <cmath>
 #include <vector>
 #include <fstream>
@@ -205,6 +208,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     SDL_GL_SetSwapInterval(1); /* Enable VSync */
+    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 
     /* Initialize GLEW */
     glewExperimental = GL_TRUE;
@@ -213,6 +217,18 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Log("Failed to initialize GLEW: %s", glewGetErrorString(glewError));
         return SDL_APP_FAILURE;
     }
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    auto& io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+    ImGui::StyleColorsDark();
+    auto& style = ImGui::GetStyle();
+    style.ScaleAllSizes(main_scale);
+
+    ImGui_ImplSDL3_InitForOpenGL(as->window, as->gl_context);
+    ImGui_ImplOpenGL3_Init("#version 460");
 
     /* Log OpenGL version */
     const GLubyte* glVersion, * glslVersion;
@@ -280,6 +296,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 /* This function runs when a new event (mouse input, keypresses, etc) occurs. */
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
+    ImGui_ImplSDL3_ProcessEvent(event);
     if(event->type == SDL_EVENT_QUIT) {
         return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
     }
@@ -291,6 +308,14 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 {
     AppState* as = (AppState*)appstate;
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+    bool showDemo = true;
+    ImGui::ShowDemoWindow(&showDemo);
+    ImGui::Render();
+
+    glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
     GL_CHECK(glClearColor(0.0, 0.3, 0.5, 1.0));
     GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
 
@@ -301,6 +326,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     GL_CHECK(glBindVertexArray(VAO));
     GL_CHECK(glDrawElements(GL_TRIANGLES, SDL_arraysize(indices), GL_UNSIGNED_INT, 0)); // last parameter is an offset when EBO is bound through VAO
     GL_CHECK(glBindVertexArray(0));
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     /* Swap buffers */
     if(!SDL_GL_SwapWindow(as->window))
@@ -316,6 +343,10 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     AppState* as = (AppState*)appstate;
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
 
     // Clean up OpenGL resources before destroying context
     if(VAO) {

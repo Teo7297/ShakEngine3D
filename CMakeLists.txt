@@ -13,7 +13,9 @@ find_package(SDL3_ttf CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
+
+# Include ImGui configuration
+include(cmake/ImGuiCMakeLists.cmake)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -30,7 +32,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     OpenGL::GL
     GLEW::GLEW
     glm::glm-header-only
-    imgui::imgui
+    ImGui
 )
 
 # Simple script for shaders compilation to spirv, will populate "SHADERS_TARGET" target to use as dependency
