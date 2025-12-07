@@ -1,35 +1,19 @@
-#define SDL_MAIN_USE_CALLBACKS 1
+
 #include <SDL3/SDL.h>
+#define SDL_MAIN_USE_CALLBACKS 1
 #include <SDL3/SDL_main.h>
 #include <GL/glew.h>
 #include <SDL3/SDL_opengl.h>
-#include <glm/glm.hpp>
+
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
-#include <cmath>
-#include <vector>
-#include <fstream>
-#include <iostream>
 
-void CheckOpenGLError(const char* stmt, const char* fname, int line)
-{
-    GLenum err = glGetError();
-    if(err != GL_NO_ERROR)
-    {
-        printf("OpenGL error %08x, at %s:%i - for %s\n", err, fname, line, stmt);
-        abort();
-    }
-}
+#include "Includes.h"
+#include "GameObject.h"
+#include "Shader.h"
 
-#ifdef _DEBUG
-#define GL_CHECK(stmt) do { \
-            stmt; \
-            CheckOpenGLError(#stmt, __FILE__, __LINE__); \
-        } while (0)
-#else
-#define GL_CHECK(stmt) stmt
-#endif
+using namespace Shak;
 
 typedef struct {
     SDL_Window* window;
@@ -46,10 +30,6 @@ static const struct {
     { SDL_PROP_APP_METADATA_TYPE_STRING, "Game Engine" }
 };
 
-/* OpenGL objects */
-static GLuint VAO, VBO, EBO;
-static GLuint shaderProgram;
-
 static float vertices[] =
 {
     -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -63,107 +43,7 @@ static unsigned int indices[] =
     0,1,2,0,3,1
 };
 
-static const char* frag = R"(
-#version 460 core
-
-layout(location = 0) in vec3 fragColor;
-
-layout(location = 0) out vec4 FragColor;
-
-void main()
-{
-    FragColor = vec4(fragColor, 1.0);
-}
-)";
-
-static const char* vert = R"(
-#version 460 core
-
-layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec3 aColor;
-
-layout(location = 0) out vec3 fragColor;
-
-void main()
-{
-    gl_Position = vec4(aPos, 1.0);
-    fragColor = aColor;
-}
-)";
-
-void createShaderProgram()
-{
-    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vshader, 1, &vert, NULL); // vertex_shader_source is a GLchar* containing glsl shader source code
-    glCompileShader(vshader);
-
-    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fshader, 1, &frag, NULL); // fragment_shader_source is a GLchar* containing glsl shader source code
-    glCompileShader(fshader);
-
-    shaderProgram = glCreateProgram();
-
-    glAttachShader(shaderProgram, vshader);
-    glAttachShader(shaderProgram, fshader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
-}
-
-std::vector<char> readBinary(const char* filename)
-{
-    std::ifstream is(filename, std::ifstream::binary);
-    std::vector<char> buffer;
-    if(is)
-    {
-        is.seekg(0, is.end);
-        int length = is.tellg();
-        is.seekg(0, is.beg);
-
-        buffer.reserve(length);
-        buffer.resize(length);
-
-        is.read(buffer.data(), length);
-        is.close();
-    }
-
-    return buffer;
-}
-
-void createShaderFromSpirv()
-{
-    auto vert = readBinary("../shaders/test.vert.spv");
-    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderBinary(1, &vshader, GL_SHADER_BINARY_FORMAT_SPIR_V_ARB, vert.data(), vert.size());
-    glSpecializeShader(vshader, "main", 0, NULL, NULL);
-    int vcompiled = 0;
-    glGetShaderiv(vshader, GL_COMPILE_STATUS, &vcompiled);
-
-    auto frag = readBinary("../shaders/test.frag.spv");
-    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderBinary(1, &fshader, GL_SHADER_BINARY_FORMAT_SPIR_V_ARB, frag.data(), frag.size());
-    glSpecializeShader(fshader, "main", 0, NULL, NULL);
-    int fcompiled = 0;
-    glGetShaderiv(fshader, GL_COMPILE_STATUS, &fcompiled);
-
-    shaderProgram = glCreateProgram();
-
-    if(vcompiled)
-        glAttachShader(shaderProgram, vshader);
-    else
-        std::cout << "v error\n";
-
-    if(fcompiled)
-        glAttachShader(shaderProgram, fshader);
-    else
-        std::cout << "f error\n";
-
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
-}
+static std::shared_ptr<GameObject> go;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
@@ -218,6 +98,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
+    // Initialize ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     auto& io = ImGui::GetIO();
@@ -237,58 +118,16 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_Log("OpenGL Version: %s", glVersion);
     SDL_Log("GLSL Version: %s", glslVersion);
 
-    /* Check for SPIR-V support */
-    if(!GLEW_ARB_gl_spirv) {
-        SDL_Log("GL_ARB_gl_spirv extension not supported. Cannot load SPIR-V shaders.");
-        return SDL_APP_FAILURE;
-    }
-
-    // createShaderProgram();
-    createShaderFromSpirv();
-
-    // Create needed buffers for vertices rendering
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    // VAO is our magic buffer. It will store the state of the next buffers!
-    glBindVertexArray(VAO);
-
-    // VBO, pass in the vertex data
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // Dynamic for animated verts
-
-    // Position attribute
-    GLuint attribCount = 0;
-    glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(float),
-        (void*)0
-    );
-    glEnableVertexAttribArray(attribCount++);
-
-    // Color attribute
-    glVertexAttribPointer(
-        1,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(float),
-        (void*)(3 * sizeof(float))
-    );
-    glEnableVertexAttribArray(attribCount++);
-
-    // EBO, pass in the indices data
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Unbind
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    std::vector<float> v;
+    v.assign(vertices, vertices + SDL_arraysize(vertices));
+    std::vector<GLuint> i;
+    i.assign(indices, indices + SDL_arraysize(indices));
+    go = std::make_shared<GameObject>(v, i);
+    auto shader = std::make_shared<Shader>();
+    shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/test.vert.spv");
+    shader->CreateFromBinaryFile(Shader::Type::Fragment, "../shaders/test.frag.spv");
+    shader->Link();
+    go->SetShader(shader);
 
     return SDL_APP_CONTINUE;
 }
@@ -319,13 +158,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     GL_CHECK(glClearColor(0.0, 0.3, 0.5, 1.0));
     GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
 
-    // Use shader program
-    GL_CHECK(glUseProgram(shaderProgram));
-
-    // Bind VAO and draw using indices
-    GL_CHECK(glBindVertexArray(VAO));
-    GL_CHECK(glDrawElements(GL_TRIANGLES, SDL_arraysize(indices), GL_UNSIGNED_INT, 0)); // last parameter is an offset when EBO is bound through VAO
-    GL_CHECK(glBindVertexArray(0));
+    go->Draw();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -347,24 +180,6 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
-
-    // Clean up OpenGL resources before destroying context
-    if(VAO) {
-        glDeleteVertexArrays(1, &VAO);
-        VAO = 0;
-    }
-    if(VBO) {
-        glDeleteBuffers(1, &VBO);
-        VBO = 0;
-    }
-    if(EBO) {
-        glDeleteBuffers(1, &EBO);
-        EBO = 0;
-    }
-    if(shaderProgram) {
-        glDeleteProgram(shaderProgram);
-        shaderProgram = 0;
-    }
 
     if(as->gl_context) {
         SDL_GL_DestroyContext(as->gl_context);
