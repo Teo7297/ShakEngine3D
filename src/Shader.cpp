@@ -2,12 +2,29 @@
 
 using namespace Shak;
 
+
 Shader::Shader()
+    : m_program(0)
 {
+    // Create the buffer
+    glCreateBuffers(1, &m_ubo);
+
+    // Allocate memory for the buffer (sizeof(MatrixBlock))
+    // GL_DYNAMIC_STORAGE_BIT allows us to update it later with glNamedBufferSubData
+    glNamedBufferStorage(m_ubo, sizeof(MatrixBlock), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    // BINDING POINT: This links the buffer to 'binding = 0' in the shader
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_ubo);
 }
 
 Shader::~Shader()
 {
+    // In the case this gets destroyed without ever being linked
+    if(m_shaderData.fragment)
+        GL_CHECK(glDeleteShader(m_shaderData.fragment));
+    if(m_shaderData.vertex)
+        GL_CHECK(glDeleteShader(m_shaderData.vertex));
+
     if(m_program)
         GL_CHECK(glDeleteProgram(m_program));
 }
@@ -143,8 +160,7 @@ bool Shader::Link()
         return false;
     }
 
-    m_program = glCreateProgram();
-
+    GL_CHECK(m_program = glCreateProgram());
     GL_CHECK(glAttachShader(m_program, m_shaderData.vertex));
     GL_CHECK(glAttachShader(m_program, m_shaderData.fragment));
     GL_CHECK(glLinkProgram(m_program));
@@ -154,15 +170,27 @@ bool Shader::Link()
     return true;
 }
 
+void Shader::SetMVP(MatrixBlock matrices)
+{
+    this->Bind();
+    GL_CHECK(glNamedBufferSubData(m_ubo, 0, sizeof(MatrixBlock), &matrices));
+}
+
+void Shak::Shader::SetUniformFloat(GLuint loc, float value)
+{
+    this->Bind();
+    GL_CHECK(glUniform1f(loc, value));
+}
+
 GLuint Shader::CreateShaderHandle(Type type)
 {
     switch(type)
     {
     case Type::Vertex:
-        m_shaderData.vertex = glCreateShader(GL_VERTEX_SHADER);
+        GL_CHECK(m_shaderData.vertex = glCreateShader(GL_VERTEX_SHADER));
         return m_shaderData.vertex;
     case Type::Fragment:
-        m_shaderData.fragment = glCreateShader(GL_FRAGMENT_SHADER);
+        GL_CHECK(m_shaderData.fragment = glCreateShader(GL_FRAGMENT_SHADER));
         return m_shaderData.fragment;
     }
     return 0;

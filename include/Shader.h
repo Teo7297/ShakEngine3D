@@ -4,6 +4,13 @@
 
 namespace Shak
 {
+    struct MatrixBlock
+    {
+        glm::mat4 model;
+        glm::mat4 view;
+        glm::mat4 projection;
+    };
+
     class Shader
     {
     private:
@@ -29,13 +36,16 @@ namespace Shak
         bool CreateFromString(Type type, const std::string& code);
         bool Link();
 
+        void SetMVP(MatrixBlock matrices); // TODO: remove data copy
+        void SetUniformFloat(GLuint loc, float value);
+
     private:
         std::vector<char> ReadBinaryFile(const fs::path& filename) const;
         std::string ReadTextFile(const fs::path& filename) const;
         GLuint CreateShaderHandle(Type type);
 
     private:
-        GLuint m_program;
+        GLuint m_program, m_ubo;
         ShadersData m_shaderData;
     };
 }

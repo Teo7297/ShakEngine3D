@@ -9,9 +9,12 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
+
 #include "Includes.h"
 #include "GameObject.h"
 #include "Shader.h"
+
+#include "TestGO.h"
 
 using namespace Shak;
 
@@ -30,25 +33,13 @@ static const struct {
     { SDL_PROP_APP_METADATA_TYPE_STRING, "Game Engine" }
 };
 
-static float vertices[] =
-{
-    -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-     0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-};
 
-static unsigned int indices[] =
-{
-    0,1,2,0,3,1
-};
-
-static std::shared_ptr<GameObject> go;
+static std::shared_ptr<TestGO> go;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    SDL_SetAppMetadata("OpenGL 4.6 Rotating Cube", "1.0", "com.example.opengl46-cube");
+    SDL_SetAppMetadata("OpenGL 4.6 Learning", "1.0", "com.example.opengl46-learning");
 
     if(!SDL_Init(SDL_INIT_VIDEO))
     {
@@ -73,7 +64,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    as->window = SDL_CreateWindow("OpenGL 4.6 Rotating Cube", 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    as->window = SDL_CreateWindow("OpenGL 4.6 Learning", 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if(!as->window)
     {
         SDL_Log("Couldn't create window: %s", SDL_GetError());
@@ -88,7 +79,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     SDL_GL_SetSwapInterval(1); /* Enable VSync */
-    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 
     /* Initialize GLEW */
     glewExperimental = GL_TRUE;
@@ -106,6 +96,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
     ImGui::StyleColorsDark();
     auto& style = ImGui::GetStyle();
+    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     style.ScaleAllSizes(main_scale);
 
     ImGui_ImplSDL3_InitForOpenGL(as->window, as->gl_context);
@@ -118,16 +109,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_Log("OpenGL Version: %s", glVersion);
     SDL_Log("GLSL Version: %s", glslVersion);
 
-    std::vector<float> v;
-    v.assign(vertices, vertices + SDL_arraysize(vertices));
-    std::vector<GLuint> i;
-    i.assign(indices, indices + SDL_arraysize(indices));
-    go = std::make_shared<GameObject>(v, i);
-    auto shader = std::make_shared<Shader>();
-    shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/test.vert.spv");
-    shader->CreateFromBinaryFile(Shader::Type::Fragment, "../shaders/test.frag.spv");
-    shader->Link();
-    go->SetShader(shader);
+    go = std::make_shared<TestGO>();
 
     return SDL_APP_CONTINUE;
 }
@@ -154,9 +136,13 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     ImGui::ShowDemoWindow(&showDemo);
     ImGui::Render();
 
-    glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+    GL_CHECK(glEnable(GL_DEPTH_TEST));
+    GL_CHECK(glEnable(GL_CULL_FACE));
+    GL_CHECK(glCullFace(GL_BACK));
     GL_CHECK(glClearColor(0.0, 0.3, 0.5, 1.0));
-    GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
+    GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
+    glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
 
     go->Draw();
 

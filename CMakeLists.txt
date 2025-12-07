@@ -13,6 +13,8 @@ find_package(SDL3_ttf CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(Stb REQUIRED)
+
 
 # Include ImGui configuration
 include(cmake/ImGuiCMakeLists.cmake)
@@ -23,6 +25,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     include
+    ${Stb_INCLUDE_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

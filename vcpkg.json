@@ -12,6 +12,7 @@
         "webp"
       ]
     },
-    "sdl3-ttf"
+    "sdl3-ttf",
+    "stb"
   ]
 }

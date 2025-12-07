@@ -1,56 +1,20 @@
 #include "GameObject.h"
 #include "Transform.h"
+#include "Material.h"
 #include "Shader.h"
 
 using namespace Shak;
+struct MatrixBlock {
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 projection;
+};
 
-
-GameObject::GameObject(const std::vector<float>& vertices, const std::vector<GLuint>& indices)
+GameObject::GameObject()
     :
-    m_vertices{ vertices },
-    m_indices{ indices },
     m_transform{ std::make_shared<Transform>() },
-    m_shader{ nullptr }
+    m_material{ nullptr }
 {
-    glGenVertexArrays(1, &m_vao);
-    glGenBuffers(1, &m_vbo);
-    glGenBuffers(1, &m_ebo);
-
-    glBindVertexArray(m_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(float), m_vertices.data(), GL_STATIC_DRAW);
-
-    // Position attribute
-    GLuint attribCount = 0;
-    glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(float),
-        (void*)0
-    );
-    glEnableVertexAttribArray(attribCount++);
-
-    // Color attribute
-    glVertexAttribPointer(
-        1,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(float),
-        (void*)(3 * sizeof(float))
-    );
-    glEnableVertexAttribArray(attribCount++);
-
-    // EBO, pass in the indices data
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), m_indices.data(), GL_STATIC_DRAW);
-
-    // Unbind
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 GameObject::~GameObject()
@@ -69,18 +33,85 @@ GameObject::~GameObject()
     }
 }
 
-void Shak::GameObject::SetShader(const std::shared_ptr<class Shader>& shader)
+void Shak::GameObject::SetMaterial(const std::shared_ptr<Material>& material)
 {
-    m_shader = shader;
+    m_material = material;
 }
-
 
 void GameObject::Draw()
 {
-    if(m_shader)
-        m_shader->Bind();
+    auto M = m_transform->GetUpdatedMatrix();
+
+    auto V = glm::identity<glm::mat4>();
+    V = glm::translate(V, glm::vec3(0.f, 0.f, -6.f));
+
+    auto P = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 100.0f);
+
+    MatrixBlock mvp = { .model = M, .view = V, .projection = P };
+
+    auto shader = m_material->GetShader();
+    shader->SetMVP(mvp);
+    shader->SetUniformFloat(0, (float)SDL_GetTicks());
+
+    if(m_material)
+        m_material->Bind();
     GL_CHECK(glBindVertexArray(m_vao));
     GL_CHECK(glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0));
     GL_CHECK(glBindVertexArray(0));
+}
+
+void GameObject::InitDrawBuffers()
+{
+    glGenVertexArrays(1, &m_vao);
+    glGenBuffers(1, &m_vbo);
+    glGenBuffers(1, &m_ebo);
+
+    glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(float), m_vertices.data(), GL_STATIC_DRAW);
+
+    // Position attribute
+    GLuint attribCount = 0;
+    glVertexAttribPointer(
+        attribCount,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(float),
+        (void*)0
+    );
+    glEnableVertexAttribArray(attribCount++);
+
+    // Color attribute
+    glVertexAttribPointer(
+        attribCount,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(float),
+        (void*)(3 * sizeof(float))
+    );
+    glEnableVertexAttribArray(attribCount++);
+
+    glVertexAttribPointer(
+        attribCount,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(float),
+        (void*)(6 * sizeof(float))
+    );
+    glEnableVertexAttribArray(attribCount++);
+
+
+
+    // EBO, pass in the indices data
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), m_indices.data(), GL_STATIC_DRAW);
+
+    // Unbind
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
