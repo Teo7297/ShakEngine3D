@@ -2,6 +2,7 @@
 
 #include "Includes.h"
 
+
 namespace Shak
 {
     class Transform
@@ -22,7 +23,7 @@ namespace Shak
         void Move(const glm::vec3& offset);
         void Rotate(const glm::quat& offset);
         void Scale(const glm::vec3& offset);
-        
+
         void SetDirtyRecursive();
 
         glm::mat4 GetLocalMatrix();

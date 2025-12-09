@@ -25,9 +25,12 @@ namespace Shak
         void SetActive(bool active);
         bool IsActive() const;
 
+        void SetPendingKill(bool pendingKill);
+        bool IsPendingKill() const;
+
         virtual void OnAwake() {}
         virtual void OnStart() {}
-        virtual void OnUpdate() {}
+        virtual void OnUpdate(float deltaTime) {}
         virtual void OnDestroy() {}
 
     protected:
@@ -35,5 +38,6 @@ namespace Shak
         GameObject* m_owner;
         Transform* m_transform;
         bool m_started;
+        bool m_pendingKill;
     };
 }

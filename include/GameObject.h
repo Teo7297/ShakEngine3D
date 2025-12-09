@@ -7,6 +7,7 @@ namespace Shak
     class Transform;
     class Material;
     class Component;
+    class Scene;
     class GameObject
     {
         friend class Scene; // This allows to have only scene to have access to the constructor
@@ -37,13 +38,14 @@ namespace Shak
             auto comp = std::make_unique<T>();
             comp->SetActive(true);
             comp->OnAwake();
-
+            this->RegisterComponentOnScene(comp.get());
             return (T*)this->AttachComponent(std::move(comp));
         }
 
         template<typename T>
         std::vector<T*> GetComponentsByType() const
         {
+            static_assert(std::is_base_of<Component, T>::value, "T must be a subclass of Component");
             std::vector<T*> result;
             for(const auto& comp : m_components)
             {
@@ -56,12 +58,18 @@ namespace Shak
 
         std::vector<Component*> GetComponents() const;
 
+        void DestroyComponent(Component* comp);
+
         virtual void OnAwake() {}
         virtual void OnStart() {}
         virtual void OnUpdate(float deltaTime) {}
+        virtual void OnLateUpdate(float deltaTime) {}
         virtual void OnDestroy() {}
 
-    protected:
+
+    private:
+        void RegisterComponentOnScene(Component* comp);
+        void OnPostUpdate();
         Component* AttachComponent(std::unique_ptr<Component> component);
 
     protected:
@@ -70,5 +78,7 @@ namespace Shak
         bool m_started;
         std::shared_ptr<Transform> m_transform;
         std::vector<std::unique_ptr<Component>> m_components;
+        std::vector<Component*> m_pendingComponentsDestroy;
+        Scene* m_scene;
     };
 }

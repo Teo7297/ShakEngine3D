@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "Shader.h"
 #include "Component.h"
+#include "Scene.h"
 
 using namespace Shak;
 struct MatrixBlock {
@@ -17,7 +18,8 @@ GameObject::GameObject()
     m_name{ "New Game Object" },
     m_started{ false },
     m_transform{ std::make_shared<Transform>() },
-    m_components{}
+    m_components{},
+    m_scene{ nullptr }
 {
 }
 
@@ -50,14 +52,40 @@ std::string GameObject::GetName() const
     return m_name;
 }
 
-void Shak::GameObject::SetActive(bool active)
+void GameObject::SetActive(bool active)
 {
     m_active = active;
 }
 
-bool Shak::GameObject::IsActive() const
+bool GameObject::IsActive() const
 {
     return m_active;
+}
+
+void GameObject::DestroyComponent(Component* comp)
+{
+    comp->SetPendingKill(true);
+}
+
+void GameObject::RegisterComponentOnScene(Component* comp)
+{
+    m_scene->RegisterComponent(comp);
+}
+
+void GameObject::OnPostUpdate()
+{
+    // Actually remove pending kill components
+    auto it = std::remove_if(m_components.begin(), m_components.end(),
+        [this](const std::unique_ptr<Component>& c) {
+            if(c->IsPendingKill()) {
+                c->OnDestroy();
+                m_scene->UnregisterComponent(c.get());
+                return true; // Delete it
+            }
+            return false;
+        });
+
+    m_components.erase(it, m_components.end());
 }
 
 Component* GameObject::AttachComponent(std::unique_ptr<Component> component)

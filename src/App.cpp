@@ -121,6 +121,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     camera->GetTransform()->SetPosition(glm::vec3(0, 0, 20));
 
     cube = scene->CreateGameObject<TestCube>("cube");
+    camera->cube = cube;
 
     return SDL_APP_CONTINUE;
 }
@@ -129,7 +130,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
     ImGui_ImplSDL3_ProcessEvent(event);
-    if(event->type == SDL_EVENT_QUIT) {
+    if(event->type == SDL_EVENT_QUIT || (event->type == SDL_EVENT_KEY_DOWN && event->key.scancode == SDL_SCANCODE_ESCAPE)) {
         return SDL_APP_SUCCESS;  /* end the program, reporting success to the OS. */
     }
     return SDL_APP_CONTINUE;  /* carry on with the program! */
@@ -168,7 +169,10 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     scene->Update(deltaTime);
 
     renderer.Setup(static_cast<CameraComponent*>(camera->GetComponentsByType<CameraComponent>()[0]));
-    cube->meshComp->Draw(renderer);
+
+    auto validCube = scene->FindGameObjectByName("cube");
+    if(validCube)
+        ((TestCube*)validCube)->meshComp->Draw(renderer);
     renderer.Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

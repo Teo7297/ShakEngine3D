@@ -9,7 +9,8 @@ Component::Component()
     m_active{ false },
     m_owner{ nullptr },
     m_transform{ nullptr },
-    m_started{ false }
+    m_started{ false },
+    m_pendingKill{ false }
 {
 
 }
@@ -48,4 +49,14 @@ void Component::SetActive(bool active)
 bool Component::IsActive() const
 {
     return m_active;
+}
+
+void Shak::Component::SetPendingKill(bool pendingKill)
+{
+    m_pendingKill = pendingKill;
+}
+
+bool Shak::Component::IsPendingKill() const
+{
+    return m_pendingKill;
 }

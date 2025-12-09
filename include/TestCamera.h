@@ -2,6 +2,7 @@
 
 #include "GameObject.h"
 #include "Transform.h"
+#include "Scene.h"
 
 using namespace Shak;
 
@@ -16,8 +17,24 @@ class TestCamera : public GameObject
         if(key_states[SDL_SCANCODE_A])
             this->GetTransform()->Move(glm::vec3(-1, 0, 0) * speed * dt);
         if(key_states[SDL_SCANCODE_W])
-            this->GetTransform()->Move(glm::vec3(0, 1, 0) * speed * dt);
+            this->GetTransform()->Move(glm::vec3(0, 0, -1) * speed * dt);
         if(key_states[SDL_SCANCODE_S])
+            this->GetTransform()->Move(glm::vec3(0, 0, 1) * speed * dt);
+        if(key_states[SDL_SCANCODE_E])
+            this->GetTransform()->Move(glm::vec3(0, 1, 0) * speed * dt);
+        if(key_states[SDL_SCANCODE_Q])
             this->GetTransform()->Move(glm::vec3(0, -1, 0) * speed * dt);
+
+        if(key_states[SDL_SCANCODE_SPACE])
+        {
+            if(!cube) return;
+
+            m_scene->DestroyGameObject(cube);
+            SDL_Log("[Camera] done");
+        }
+
     }
+
+public:
+    GameObject* cube;
 };

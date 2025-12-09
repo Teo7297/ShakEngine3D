@@ -7,6 +7,7 @@
 #include "Material.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "components/TestComponent.h"
 
 using namespace Shak;
 
@@ -86,6 +87,7 @@ public:
         meshComp->SetMaterial(std::move(material));
     }
 
+    int frame = 0;
     void OnUpdate(float dt) override
     {
         const bool* key_states = SDL_GetKeyboardState(NULL);
@@ -98,7 +100,37 @@ public:
             this->GetTransform()->Move(glm::vec3(0, 1, 0) * speed * dt);
         if(key_states[SDL_SCANCODE_K])
             this->GetTransform()->Move(glm::vec3(0, -1, 0) * speed * dt);
+
+        if(key_states[SDL_SCANCODE_V])
+        {
+            auto list = this->GetComponentsByType<TestComponent>();
+            if(!list.empty())
+                return;
+
+            testComp = this->AddComponent<TestComponent>();
+            SDL_Log("[Cube] created i think");
+        }
+
+        if(key_states[SDL_SCANCODE_B])
+        {
+            if(this->GetComponentsByType<TestComponent>().empty())
+                return;
+
+            this->DestroyComponent(testComp);
+        }
+
+        if(frame++ % 100 == 0)
+        {
+            SDL_Log("cube %d", frame - 1);
+        }
+
+    }
+
+    void OnDestroy() override
+    {
+        SDL_Log("[CUBE] byebye");
     }
 
     MeshComponent* meshComp; // not here
+    TestComponent* testComp;
 };
