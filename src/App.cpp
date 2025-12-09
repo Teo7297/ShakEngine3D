@@ -16,6 +16,7 @@
 #include "Scene.h"
 #include "components/CameraComponent.h"
 #include "TestCube.h"
+#include "TestCamera.h"
 #include "Renderer.h"
 
 using namespace Shak;
@@ -36,7 +37,7 @@ static const struct {
 };
 
 static std::shared_ptr<Scene> scene;
-static GameObject* camera;
+static TestCamera* camera;
 static TestCube* cube;
 static Renderer renderer;
 
@@ -115,10 +116,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
 
     scene = std::make_shared<Scene>();
-    camera = scene->CreateGameObject<GameObject>("camera");
-    auto cameraComp = std::make_shared<CameraComponent>();
-    camera->AttachComponent(cameraComp);
-    camera->GetTransform()->SetPosition(glm::vec3(0, 0, 6));
+    camera = scene->CreateGameObject<TestCamera>("camera");
+    camera->AddComponent<CameraComponent>();
+    camera->GetTransform()->SetPosition(glm::vec3(0, 0, 20));
 
     cube = scene->CreateGameObject<TestCube>("cube");
 
@@ -162,12 +162,12 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     LAST = NOW;
     NOW = SDL_GetPerformanceCounter();
 
-    deltaTime = (float)((NOW - LAST) * 1000 / (float)SDL_GetPerformanceFrequency());
+    deltaTime = (float)((NOW - LAST) / (float)SDL_GetPerformanceFrequency());
 
     //Draw scene here
     scene->Update(deltaTime);
 
-    renderer.Setup(static_cast<CameraComponent*>(camera->GetComponent(0)));
+    renderer.Setup(static_cast<CameraComponent*>(camera->GetComponentsByType<CameraComponent>()[0]));
     cube->meshComp->Draw(renderer);
     renderer.Render();
 

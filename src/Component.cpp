@@ -6,6 +6,7 @@ using namespace Shak;
 
 Component::Component()
     :
+    m_active{ false },
     m_owner{ nullptr },
     m_transform{ nullptr },
     m_started{ false }
@@ -37,4 +38,14 @@ void Component::SetStarted(bool started)
 bool Component::HasStarted() const
 {
     return m_started;
+}
+
+void Component::SetActive(bool active)
+{
+    m_active = active;
+}
+
+bool Component::IsActive() const
+{
+    return m_active;
 }

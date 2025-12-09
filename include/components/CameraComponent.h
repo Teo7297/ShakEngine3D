@@ -11,7 +11,7 @@ namespace Shak
         // Projection Settings
         glm::mat4 m_projectionMatrix;
         float m_fov = 45.0f;
-        float m_aspectRatio = 16.0f / 9.0f;
+        float m_aspectRatio = 800.f / 600.f;
         float m_nearClip = 0.1f;
         float m_farClip = 100.0f;
 

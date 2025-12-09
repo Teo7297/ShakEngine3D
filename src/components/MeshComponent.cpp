@@ -7,15 +7,23 @@
 
 using namespace Shak;
 
-MeshComponent::MeshComponent(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material)
-    :
-    m_mesh{ std::move(mesh) },
-    m_material{ std::move(material) }
+MeshComponent::MeshComponent()
 {
 }
 
 MeshComponent::~MeshComponent()
 {
+}
+
+void MeshComponent::SetMesh(std::shared_ptr<Mesh> mesh)
+{
+    m_mesh = mesh;
+}
+
+
+void MeshComponent::SetMaterial(std::shared_ptr<Material> material)
+{
+    m_material = material;
 }
 
 void MeshComponent::Draw(Renderer& renderer)

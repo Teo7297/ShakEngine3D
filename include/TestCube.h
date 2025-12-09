@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Includes.h"
 #include "GameObject.h"
 #include "Mesh.h"
 #include "components/MeshComponent.h"
@@ -80,9 +81,24 @@ public:
         material->SetShader(shader);
         material->AddTexture(texture);
 
-        meshComp = std::make_shared<MeshComponent>(std::move(mesh), std::move(material));
-        this->AttachComponent(meshComp);
+        meshComp = (MeshComponent*)this->AddComponent<MeshComponent>();
+        meshComp->SetMesh(std::move(mesh));
+        meshComp->SetMaterial(std::move(material));
     }
 
-    std::shared_ptr<MeshComponent> meshComp; // not here
+    void OnUpdate(float dt) override
+    {
+        const bool* key_states = SDL_GetKeyboardState(NULL);
+        static float speed = 2.f;
+        if(key_states[SDL_SCANCODE_L])
+            this->GetTransform()->Move(glm::vec3(1, 0, 0) * speed * dt);
+        if(key_states[SDL_SCANCODE_J])
+            this->GetTransform()->Move(glm::vec3(-1, 0, 0) * speed * dt);
+        if(key_states[SDL_SCANCODE_I])
+            this->GetTransform()->Move(glm::vec3(0, 1, 0) * speed * dt);
+        if(key_states[SDL_SCANCODE_K])
+            this->GetTransform()->Move(glm::vec3(0, -1, 0) * speed * dt);
+    }
+
+    MeshComponent* meshComp; // not here
 };

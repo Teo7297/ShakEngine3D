@@ -12,8 +12,11 @@ namespace Shak
     {
     public:
         //TODO: use raw ptrs here. leave ownership to resource manager!
-        MeshComponent(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material);
+        MeshComponent();
         ~MeshComponent() override;
+
+        void SetMesh(std::shared_ptr<Mesh> mesh);
+        void SetMaterial(std::shared_ptr<Material> material);
 
         void Draw(Renderer& renderer);
     private:

@@ -9,12 +9,15 @@ namespace Shak
     class Component;
     class GameObject
     {
-    public:
+        friend class Scene; // This allows to have only scene to have access to the constructor
+
+    protected:
         GameObject();
+
+    public:
         virtual ~GameObject();
 
         const std::shared_ptr<Transform>& GetTransform() const;
-        void AttachComponent(std::shared_ptr<Component> component);
 
         bool HasStarted() const;
         void SetStarted(bool started);
@@ -25,7 +28,33 @@ namespace Shak
         void SetActive(bool active);
         bool IsActive() const;
 
-        Component* GetComponent(int index);
+        // Add a component to this gameobject and returns a ptr to it. Memory is owned by GameObject.
+        template<typename T>
+        T* AddComponent()
+        {
+            static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
+
+            auto comp = std::make_unique<T>();
+            comp->SetActive(true);
+            comp->OnAwake();
+
+            return (T*)this->AttachComponent(std::move(comp));
+        }
+
+        template<typename T>
+        std::vector<T*> GetComponentsByType() const
+        {
+            std::vector<T*> result;
+            for(const auto& comp : m_components)
+            {
+                auto rawTPtr = dynamic_cast<T*>(comp.get());
+                if(rawTPtr)
+                    result.emplace_back(rawTPtr);
+            }
+            return result;
+        }
+
+        std::vector<Component*> GetComponents() const;
 
         virtual void OnAwake() {}
         virtual void OnStart() {}
@@ -33,12 +62,13 @@ namespace Shak
         virtual void OnDestroy() {}
 
     protected:
+        Component* AttachComponent(std::unique_ptr<Component> component);
 
     protected:
         bool m_active;
         std::string m_name;
         bool m_started;
         std::shared_ptr<Transform> m_transform;
-        std::vector<std::shared_ptr<Component>> m_components;
+        std::vector<std::unique_ptr<Component>> m_components;
     };
 }

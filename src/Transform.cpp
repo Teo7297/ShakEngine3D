@@ -139,6 +139,21 @@ void Transform::AddChild(Transform* child)
     child->SetParent(this);
 }
 
+void Transform::PrintGlobalMatrix()
+{
+    SDL_Log(glm::to_string(this->GetGlobalMatrix()).c_str());
+}
+
+void Transform::PrintLocalMatrix()
+{
+    SDL_Log(glm::to_string(this->GetLocalMatrix()).c_str());
+}
+
+void Shak::Transform::PrintMatrix(const glm::mat4& mat)
+{
+    SDL_Log(glm::to_string(mat).c_str());
+}
+
 void Shak::Transform::Decompose()
 {
     if(!m_isDirty)

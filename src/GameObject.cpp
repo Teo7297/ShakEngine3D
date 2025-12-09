@@ -30,12 +30,6 @@ const std::shared_ptr<Transform>& GameObject::GetTransform() const
     return m_transform;
 }
 
-void GameObject::AttachComponent(std::shared_ptr<Component> component)
-{
-    component->SetOwner(this);
-    m_components.emplace_back(std::move(component));
-}
-
 bool GameObject::HasStarted() const
 {
     return m_started;
@@ -66,7 +60,19 @@ bool Shak::GameObject::IsActive() const
     return m_active;
 }
 
-Component* GameObject::GetComponent(int index)
+Component* GameObject::AttachComponent(std::unique_ptr<Component> component)
 {
-    return m_components[index].get();
+    component->SetOwner(this);
+    m_components.push_back(std::move(component));
+    return (m_components.end() - 1)->get();
+}
+
+std::vector<Component*> GameObject::GetComponents() const
+{
+    std::vector<Component*> componentsPtrs;
+    componentsPtrs.reserve(m_components.size());
+    for(const auto& comp : m_components)
+        componentsPtrs.emplace_back(comp.get());
+
+    return componentsPtrs;
 }

@@ -35,6 +35,11 @@ namespace Shak
         void AddChild(Transform* child);
         std::vector<Transform*> GetChildren();
 
+        //DEBUG
+        void PrintGlobalMatrix();
+        void PrintLocalMatrix();
+        static void PrintMatrix(const glm::mat4& mat);
+
     private:
         void Decompose();
 

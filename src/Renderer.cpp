@@ -37,9 +37,7 @@ void Renderer::Render()
     {
         MatrixBlock mvp =
         {
-            .model = glm::identity<glm::mat4>(),
-            // .viewProjection = P * V
-            // .model = command.modelMatrix,
+            .model = command.modelMatrix,
             .viewProjection = m_sceneData.viewProjectionMatrix
         };
 
@@ -55,4 +53,6 @@ void Renderer::Render()
         command.mesh->Bind();
         GL_CHECK(glDrawElements(GL_TRIANGLES, command.mesh->GetIndicesCount(), GL_UNSIGNED_INT, 0));
     }
+
+    m_renderQueue.clear();
 }

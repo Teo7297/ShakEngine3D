@@ -8,8 +8,12 @@ namespace Shak
     class Transform;
     class Component
     {
-    public:
+        friend class GameObject; // This allows to have only gameobject to have access to the constructor
+
+    protected:
         Component();
+
+    public:
         virtual ~Component();
 
         void SetOwner(GameObject* owner);
@@ -18,12 +22,16 @@ namespace Shak
         void SetStarted(bool started);
         bool HasStarted() const;
 
+        void SetActive(bool active);
+        bool IsActive() const;
+
         virtual void OnAwake() {}
         virtual void OnStart() {}
         virtual void OnUpdate() {}
         virtual void OnDestroy() {}
 
     protected:
+        bool m_active;
         GameObject* m_owner;
         Transform* m_transform;
         bool m_started;

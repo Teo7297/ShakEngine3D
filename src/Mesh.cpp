@@ -44,7 +44,7 @@ void Mesh::InitGLBuffers()
 
     GL_CHECK(glBindVertexArray(m_vao));
     GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
-    GL_CHECK(glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(float), m_vertices.data(), GL_STATIC_DRAW));
+    GL_CHECK(glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(float), m_vertices.data(), GL_DYNAMIC_DRAW));
 
     // Position attribute
     GLuint attribCount = 0;
@@ -82,7 +82,7 @@ void Mesh::InitGLBuffers()
 
     // EBO, pass in the indices data
     GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo));
-    GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), m_indices.data(), GL_STATIC_DRAW));
+    GL_CHECK(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), m_indices.data(), GL_DYNAMIC_DRAW));
 
     // Unbind
     GL_CHECK(glBindVertexArray(0));

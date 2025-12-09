@@ -27,6 +27,9 @@ Shader::~Shader()
 
     if(m_program)
         GL_CHECK(glDeleteProgram(m_program));
+
+    if(m_ubo)
+        GL_CHECK(glDeleteBuffers(1, &m_ubo));
 }
 
 std::vector<char> Shader::ReadBinaryFile(const fs::path& filename) const
@@ -74,6 +77,10 @@ bool Shader::Bind()
     if(!m_program)
         return false;
     GL_CHECK(glUseProgram(m_program));
+
+    if(m_ubo)
+        GL_CHECK(glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_ubo));
+
     return true;
 }
 
