@@ -9,7 +9,7 @@ namespace Shak
     public:
         Texture();
         ~Texture();
-        bool LoadFromFile(const fs::path& filename);
+        bool LoadFromFile(const fs::path& filename, GLint format);
         void Bind();
 
     private:

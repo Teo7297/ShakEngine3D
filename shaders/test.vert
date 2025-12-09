@@ -7,8 +7,7 @@ layout(location = 2) in vec2 aTexCoord;
 layout(std140, binding = 0) uniform MatrixBlock
 {
     mat4 model;
-    mat4 view;
-    mat4 projection;
+    mat4 viewProjection;
 }
 ubo;
 
@@ -17,7 +16,7 @@ layout(location = 1) out vec2 texCoord;
 
 void main()
 {
-    gl_Position = ubo.projection * ubo.view * ubo.model * vec4(aPos, 1.0);
+    gl_Position = ubo.viewProjection * ubo.model * vec4(aPos, 1.0);
     fragColor = aColor;
     texCoord = aTexCoord;
 }

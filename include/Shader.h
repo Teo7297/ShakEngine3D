@@ -7,8 +7,7 @@ namespace Shak
     struct MatrixBlock
     {
         glm::mat4 model;
-        glm::mat4 view;
-        glm::mat4 projection;
+        glm::mat4 viewProjection;
     };
 
     class Shader
@@ -38,6 +37,7 @@ namespace Shak
 
         void SetMVP(MatrixBlock matrices); // TODO: remove data copy
         void SetUniformFloat(GLuint loc, float value);
+        void SetUniformInt(GLuint loc, int value);
 
     private:
         std::vector<char> ReadBinaryFile(const fs::path& filename) const;

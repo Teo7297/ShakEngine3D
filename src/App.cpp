@@ -13,8 +13,10 @@
 #include "Includes.h"
 #include "GameObject.h"
 #include "Shader.h"
-
-#include "TestGO.h"
+#include "Scene.h"
+#include "components/CameraComponent.h"
+#include "TestCube.h"
+#include "Renderer.h"
 
 using namespace Shak;
 
@@ -33,8 +35,10 @@ static const struct {
     { SDL_PROP_APP_METADATA_TYPE_STRING, "Game Engine" }
 };
 
-
-static std::shared_ptr<TestGO> go;
+static std::shared_ptr<Scene> scene;
+static GameObject* camera;
+static TestCube* cube;
+static Renderer renderer;
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
@@ -109,7 +113,14 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_Log("OpenGL Version: %s", glVersion);
     SDL_Log("GLSL Version: %s", glslVersion);
 
-    go = std::make_shared<TestGO>();
+
+    scene = std::make_shared<Scene>();
+    camera = scene->CreateGameObject<GameObject>("camera");
+    auto cameraComp = std::make_shared<CameraComponent>();
+    camera->AttachComponent(cameraComp);
+    camera->GetTransform()->SetPosition(glm::vec3(0, 0, 6));
+
+    cube = scene->CreateGameObject<TestCube>("cube");
 
     return SDL_APP_CONTINUE;
 }
@@ -123,6 +134,10 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     }
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
+
+static Uint64 NOW = SDL_GetPerformanceCounter();
+static Uint64 LAST = 0;
+static float deltaTime = 0;
 
 /* This function runs once per frame, and is the heart of the program. */
 SDL_AppResult SDL_AppIterate(void* appstate)
@@ -144,7 +159,17 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
     glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
 
-    go->Draw();
+    LAST = NOW;
+    NOW = SDL_GetPerformanceCounter();
+
+    deltaTime = (float)((NOW - LAST) * 1000 / (float)SDL_GetPerformanceFrequency());
+
+    //Draw scene here
+    scene->Update(deltaTime);
+
+    renderer.Setup(static_cast<CameraComponent*>(camera->GetComponent(0)));
+    cube->meshComp->Draw(renderer);
+    renderer.Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

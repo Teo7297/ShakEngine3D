@@ -22,14 +22,24 @@ namespace Shak
         void Move(const glm::vec3& offset);
         void Rotate(const glm::quat& offset);
         void Scale(const glm::vec3& offset);
+        
+        void SetDirtyRecursive();
 
-        glm::mat4 GetUpdatedMatrix();
+        glm::mat4 GetLocalMatrix();
+        glm::mat4 GetGlobalMatrix();
+        void UpdateMatrices(const glm::mat4& parentGlobalMatrix);
+
+        void SetParent(Transform* parent);
+        Transform* GetParent();
+
+        void AddChild(Transform* child);
+        std::vector<Transform*> GetChildren();
 
     private:
         void Decompose();
 
     private:
-        glm::mat4 m_matrix;
+        glm::mat4 m_localMatrix, m_globalMatrix;
 
         bool m_isDirty;
         glm::vec3 m_dirtyPosition;
@@ -41,5 +51,9 @@ namespace Shak
         glm::vec3 m_translation;
         glm::vec3 m_skew;
         glm::vec4 m_perspective;
+
+        // Hierarchy
+        Transform* m_parent;
+        std::vector<Transform*> m_children;
     };
 }

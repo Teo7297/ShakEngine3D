@@ -16,8 +16,10 @@ Texture::~Texture()
     glDeleteTextures(1, &m_textureID);
 }
 
-bool Texture::LoadFromFile(const fs::path& filename)
+bool Texture::LoadFromFile(const fs::path& filename, GLint format)
 {
+    stbi_set_flip_vertically_on_load(true);
+
     int width, height, nrChannels;
     unsigned char* data = stbi_load(filename.string().c_str(), &width, &height, &nrChannels, 0);
 
@@ -35,7 +37,7 @@ bool Texture::LoadFromFile(const fs::path& filename)
     GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
     GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
-    GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+    GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data));
     GL_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
 
     stbi_image_free(data);
@@ -45,9 +47,5 @@ bool Texture::LoadFromFile(const fs::path& filename)
 
 void Texture::Bind()
 {
-    /* TODO: allow multiple bindings using the following to pass the active slot to shaders:
-    glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);
-    */
-    GL_CHECK(glActiveTexture(GL_TEXTURE0)); // this should be probably done in the material
     GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureID));
 }

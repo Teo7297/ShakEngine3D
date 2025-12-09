@@ -7,7 +7,18 @@ namespace Shak
     class Mesh
     {
     public:
-        void Draw();
+        // Data should be passed with std::move in here
+        Mesh(std::vector<float> vertices, std::vector<GLuint> indices);
+        ~Mesh();
+        void Bind();
+        int GetIndicesCount();
+
     private:
+        void InitGLBuffers();
+
+    private:
+        std::vector<float> m_vertices;
+        std::vector<GLuint> m_indices;
+        GLuint m_vao, m_vbo, m_ebo;
     };
 }

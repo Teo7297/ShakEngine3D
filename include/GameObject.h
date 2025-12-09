@@ -4,24 +4,41 @@
 
 namespace Shak
 {
+    class Transform;
+    class Material;
+    class Component;
     class GameObject
     {
     public:
         GameObject();
-        ~GameObject();
+        virtual ~GameObject();
 
-        void SetMaterial(const std::shared_ptr<class Material>& materila);
+        const std::shared_ptr<Transform>& GetTransform() const;
+        void AttachComponent(std::shared_ptr<Component> component);
 
-        void Draw();
+        bool HasStarted() const;
+        void SetStarted(bool started);
+
+        void SetName(const std::string& name);
+        std::string GetName() const;
+
+        void SetActive(bool active);
+        bool IsActive() const;
+
+        Component* GetComponent(int index);
+
+        virtual void OnAwake() {}
+        virtual void OnStart() {}
+        virtual void OnUpdate(float deltaTime) {}
+        virtual void OnDestroy() {}
 
     protected:
-        void InitDrawBuffers();
 
     protected:
-        std::shared_ptr<class Transform> m_transform;
-        std::vector<float> m_vertices;
-        std::vector<GLuint> m_indices;
-        GLuint m_vao, m_vbo, m_ebo;
-        std::shared_ptr<class Material> m_material;
+        bool m_active;
+        std::string m_name;
+        bool m_started;
+        std::shared_ptr<Transform> m_transform;
+        std::vector<std::shared_ptr<Component>> m_components;
     };
 }

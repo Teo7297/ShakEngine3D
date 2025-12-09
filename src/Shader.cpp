@@ -172,14 +172,17 @@ bool Shader::Link()
 
 void Shader::SetMVP(MatrixBlock matrices)
 {
-    this->Bind();
     GL_CHECK(glNamedBufferSubData(m_ubo, 0, sizeof(MatrixBlock), &matrices));
 }
 
-void Shak::Shader::SetUniformFloat(GLuint loc, float value)
+void Shader::SetUniformFloat(GLuint loc, float value)
 {
-    this->Bind();
     GL_CHECK(glUniform1f(loc, value));
+}
+
+void Shader::SetUniformInt(GLuint loc, int value)
+{
+    GL_CHECK(glUniform1i(loc, value));
 }
 
 GLuint Shader::CreateShaderHandle(Type type)

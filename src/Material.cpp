@@ -5,7 +5,7 @@
 using namespace Shak;
 
 Material::Material()
-    : m_texture{ nullptr }, m_shader{ nullptr }
+    : m_textures{}, m_shader{ nullptr }
 {
 }
 
@@ -14,19 +14,25 @@ Material::~Material()
 
 }
 
-void Material::SetTexture(const std::shared_ptr<class Texture>& texture)
+int Material::AddTexture(const std::shared_ptr<Texture>& texture)
 {
-    m_texture = texture;
+    m_textures.emplace_back(texture);
+    return m_textures.size() - 1;
 }
 
-void Material::SetShader(const std::shared_ptr<class Shader>& shader)
+void Material::SetShader(const std::shared_ptr<Shader>& shader)
 {
     m_shader = shader;
 }
 
-std::shared_ptr<Texture> Shak::Material::GetTexture() const
+std::shared_ptr<Texture> Shak::Material::GetTexture(int index) const
 {
-    return m_texture;
+    if(index >= m_textures.size())
+    {
+        SDL_LogError(0, "[Material] Tried to get texture #%i but there are only %i available", index, m_textures.size());
+        return nullptr;
+    }
+    return m_textures[index];
 }
 
 std::shared_ptr<Shader> Shak::Material::GetShader() const
@@ -34,10 +40,11 @@ std::shared_ptr<Shader> Shak::Material::GetShader() const
     return m_shader;
 }
 
-void Material::Bind()
+void Material::BindTextures()
 {
-    if(m_texture)
-        m_texture->Bind();
-    if(m_shader)
-        m_shader->Bind();
+    for(int slot = 0; slot < m_textures.size(); slot++)
+    {
+        GL_CHECK(glActiveTexture(GL_TEXTURE0 + slot));
+        m_textures[slot]->Bind();
+    }
 }
