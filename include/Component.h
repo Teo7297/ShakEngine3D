@@ -16,6 +16,8 @@ namespace Shak
     public:
         virtual ~Component();
 
+        void SetName(const std::string& name);
+
         void SetOwner(GameObject* owner);
         GameObject* GetOwner() const;
 
@@ -34,6 +36,7 @@ namespace Shak
         virtual void OnDestroy() {}
 
     protected:
+        std::string m_name;
         bool m_active;
         GameObject* m_owner;
         Transform* m_transform;

@@ -7,6 +7,7 @@ namespace Shak
 {
     class Transform
     {
+        friend class GameObject;
     public:
         Transform();
         ~Transform() = default;
@@ -26,15 +27,17 @@ namespace Shak
 
         void SetDirtyRecursive();
 
-        glm::mat4 GetLocalMatrix();
-        glm::mat4 GetGlobalMatrix();
+        glm::mat4 GetLocalMatrix() const;
+        glm::mat4 GetGlobalMatrix() const;
         void UpdateMatrices(const glm::mat4& parentGlobalMatrix);
 
         void SetParent(Transform* parent);
-        Transform* GetParent();
+        Transform* GetParent() const;
 
         void AddChild(Transform* child);
-        std::vector<Transform*> GetChildren();
+        std::vector<Transform*> GetChildren() const;
+
+        GameObject* GetGameObject() const;
 
         //DEBUG
         void PrintGlobalMatrix();
@@ -61,5 +64,6 @@ namespace Shak
         // Hierarchy
         Transform* m_parent;
         std::vector<Transform*> m_children;
+        GameObject* m_ownerGameObject;
     };
 }

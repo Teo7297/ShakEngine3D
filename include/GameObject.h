@@ -18,7 +18,7 @@ namespace Shak
     public:
         virtual ~GameObject();
 
-        const std::shared_ptr<Transform>& GetTransform() const;
+        Transform* GetTransform() const;
 
         bool HasStarted() const;
         void SetStarted(bool started);
@@ -31,11 +31,12 @@ namespace Shak
 
         // Add a component to this gameobject and returns a ptr to it. Memory is owned by GameObject.
         template<typename T>
-        T* AddComponent()
+        T* AddComponent(const std::string& name)
         {
             static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
 
             auto comp = std::make_unique<T>();
+            comp->SetName(name);
             comp->SetActive(true);
             comp->OnAwake();
             this->RegisterComponentOnScene(comp.get());
@@ -58,7 +59,11 @@ namespace Shak
 
         std::vector<Component*> GetComponents() const;
 
+        void SetPendingKill(bool kill);
+        bool IsPendingKill() const;
+
         void DestroyComponent(Component* comp);
+        void DestroyAllComponents();
 
         virtual void OnAwake() {}
         virtual void OnStart() {}
@@ -76,9 +81,10 @@ namespace Shak
         bool m_active;
         std::string m_name;
         bool m_started;
-        std::shared_ptr<Transform> m_transform;
+        std::unique_ptr<Transform> m_transform;
         std::vector<std::unique_ptr<Component>> m_components;
         std::vector<Component*> m_pendingComponentsDestroy;
         Scene* m_scene;
+        bool m_pendingKill;
     };
 }

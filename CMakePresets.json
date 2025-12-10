@@ -2,12 +2,19 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "vcpkg",
+            "name": "vcpkg-msvc-ninjamulticonf",
+            "displayName": "VCPKG MSVC Ninja Multi-Config",
+            "description": "Target Windows using vcpkg, MSVC and Ninja Multi-Config",
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "cl.exe",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "VCPKG_TARGET_TRIPLET": "x64-windows"
+            },
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
             }
         }
     ]

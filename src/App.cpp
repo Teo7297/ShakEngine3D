@@ -117,7 +117,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     scene = std::make_shared<Scene>();
     camera = scene->CreateGameObject<TestCamera>("camera");
-    camera->AddComponent<CameraComponent>();
+    camera->AddComponent<CameraComponent>("CamComp");
     camera->GetTransform()->SetPosition(glm::vec3(0, 0, 20));
 
     cube = scene->CreateGameObject<TestCube>("cube");

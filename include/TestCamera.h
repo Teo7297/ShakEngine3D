@@ -27,9 +27,10 @@ class TestCamera : public GameObject
 
         if(key_states[SDL_SCANCODE_SPACE])
         {
-            if(!cube) return;
+            if(!cube) return; // THIS WON'T WORK. EITHER USE HANDLES OR BE CAREFUL WHEN DESTROYING OBJECTS!
 
             m_scene->DestroyGameObject(cube);
+            cube = nullptr;
             SDL_Log("[Camera] done");
         }
 

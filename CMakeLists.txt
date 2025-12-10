@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1.0)
+cmake_minimum_required(VERSION 4.2.0)
 
 project(EngineLearning VERSION 1.0 LANGUAGES CXX)
 

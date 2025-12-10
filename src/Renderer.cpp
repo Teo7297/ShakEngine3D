@@ -44,7 +44,7 @@ void Renderer::Render()
         auto shader = command.material->GetShader();
         shader->Bind();
         shader->SetMVP(mvp);
-        shader->SetUniformFloat(0, (float)SDL_GetTicks());
+        // shader->SetUniformFloat(0, (float)SDL_GetTicks());
         shader->SetUniformInt(1, 0);
         // shader->SetUniformInt(2, 1);
 

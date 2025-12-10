@@ -20,10 +20,15 @@ Component::~Component()
 
 }
 
+void Component::SetName(const std::string& name)
+{
+    m_name = name;
+}
+
 void Component::SetOwner(GameObject* owner)
 {
     m_owner = owner;
-    m_transform = owner->GetTransform().get();
+    m_transform = owner->GetTransform();
 }
 
 GameObject* Component::GetOwner() const

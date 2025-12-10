@@ -4,8 +4,17 @@
 
 namespace Shak
 {
+    typedef int GameObjectHandle;
+
     class Component;
     class GameObject;
+
+    struct GameObjectData
+    {
+        int watermark;
+        GameObject* gameObject;
+    };
+
     class Scene
     {
         friend class GameObject;
@@ -35,10 +44,27 @@ namespace Shak
             return (T*)added.get();
         }
 
-
         void DestroyGameObject(GameObject* toDestroy);
 
+        /// @brief Returns the first found GameObject with the given name
+        /// @param name 
+        /// @return GameObject*
         GameObject* FindGameObjectByName(const std::string& name);
+
+        template<typename T>
+        std::vector<T*> FindGameObjectsByType()
+        {
+            static_assert(std::is_base_of<GameObject, T>::value, "T must be a GameObject");
+
+            std::vector<T*> result;
+            for(const auto& go : m_gameObjects)
+            {
+                auto raw = dynamic_cast<T*>(go.get());
+                if(raw)
+                    result.push_back(raw);
+            }
+            return result;
+        }
 
         void Update(float deltaTime);
         void UpdateTransformHierarchy();
@@ -55,5 +81,7 @@ namespace Shak
         std::vector<std::unique_ptr<GameObject>> m_gameObjects, m_pendingAdd;
         std::vector<GameObject*> m_pendingDestroy;
         std::vector<Component*> m_components, m_pendingComponentsAdd;
+
+        std::unordered_map<GameObjectHandle, GameObjectData> m_gameObjectHandles;
     };
 }

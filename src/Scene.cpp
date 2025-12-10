@@ -27,7 +27,11 @@ void Scene::UnregisterComponent(Component* comp)
 
 void Scene::DestroyGameObject(GameObject* toDestroy)
 {
+    for(auto* child : toDestroy->GetTransform()->GetChildren())
+        m_pendingDestroy.emplace_back(child->GetGameObject());
     m_pendingDestroy.emplace_back(toDestroy);
+
+    toDestroy->SetPendingKill(true); // This marks itself, its components and children recursively 
 }
 
 GameObject* Scene::FindGameObjectByName(const std::string& name)
@@ -93,14 +97,6 @@ void Scene::UpdateGameObjects(float deltaTime)
         go->OnLateUpdate(deltaTime);
     }
 
-    // Process destroyed objects
-    for(auto& toDestroy : m_pendingDestroy)
-    {
-        toDestroy->OnDestroy();
-        std::erase_if(m_gameObjects, [&](const auto& go) {return go.get() == toDestroy;});
-    }
-    m_pendingDestroy.clear();
-
     this->UpdateTransformHierarchy();
 }
 
@@ -133,6 +129,7 @@ void Scene::UpdateComponents(float deltaTime)
 
 void Scene::PostUpdateGameObjects()
 {
+    // GameObjects can clear their pendingKill components for example
     for(auto& go : m_gameObjects)
     {
         if(!go->IsActive())
@@ -140,4 +137,12 @@ void Scene::PostUpdateGameObjects()
 
         go->OnPostUpdate();
     }
+
+    // Process destroyed objects
+    for(auto& toDestroy : m_pendingDestroy)
+    {
+        toDestroy->OnDestroy();
+        std::erase_if(m_gameObjects, [&](const auto& go) {return go.get() == toDestroy;});
+    }
+    m_pendingDestroy.clear();
 }

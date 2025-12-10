@@ -64,7 +64,9 @@ class TestCube : public GameObject
 {
 public:
     TestCube() { m_active = true; }
-    ~TestCube() override {}
+    ~TestCube() override {
+        SDL_Log("Destroyed cube!");
+    }
 
     void OnAwake() override
     {
@@ -82,7 +84,7 @@ public:
         material->SetShader(shader);
         material->AddTexture(texture);
 
-        meshComp = (MeshComponent*)this->AddComponent<MeshComponent>();
+        meshComp = (MeshComponent*)this->AddComponent<MeshComponent>("MeshComp");
         meshComp->SetMesh(std::move(mesh));
         meshComp->SetMaterial(std::move(material));
     }
@@ -107,7 +109,7 @@ public:
             if(!list.empty())
                 return;
 
-            testComp = this->AddComponent<TestComponent>();
+            testComp = this->AddComponent<TestComponent>("TestComp");
             SDL_Log("[Cube] created i think");
         }
 
@@ -119,11 +121,11 @@ public:
             this->DestroyComponent(testComp);
         }
 
-        if(frame++ % 100 == 0)
+        if(key_states[SDL_SCANCODE_H])
         {
-            SDL_Log("cube %d", frame - 1);
+            for(auto* found : m_scene->FindGameObjectsByType<TestCube>())
+                SDL_Log("%s", found->GetName().c_str());
         }
-
     }
 
     void OnDestroy() override

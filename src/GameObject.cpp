@@ -17,19 +17,21 @@ GameObject::GameObject()
     m_active{ false },
     m_name{ "New Game Object" },
     m_started{ false },
-    m_transform{ std::make_shared<Transform>() },
+    m_transform{ std::make_unique<Transform>() },
     m_components{},
-    m_scene{ nullptr }
+    m_scene{ nullptr },
+    m_pendingKill{ false }
 {
+    m_transform->m_ownerGameObject = this;
 }
 
 GameObject::~GameObject()
 {
 }
 
-const std::shared_ptr<Transform>& GameObject::GetTransform() const
+Transform* GameObject::GetTransform() const
 {
-    return m_transform;
+    return m_transform.get();
 }
 
 bool GameObject::HasStarted() const
@@ -65,6 +67,12 @@ bool GameObject::IsActive() const
 void GameObject::DestroyComponent(Component* comp)
 {
     comp->SetPendingKill(true);
+}
+
+void GameObject::DestroyAllComponents()
+{
+    for(const auto& comp : m_components)
+        comp->SetPendingKill(true);
 }
 
 void GameObject::RegisterComponentOnScene(Component* comp)
@@ -103,4 +111,22 @@ std::vector<Component*> GameObject::GetComponents() const
         componentsPtrs.emplace_back(comp.get());
 
     return componentsPtrs;
+}
+
+void GameObject::SetPendingKill(bool kill)
+{
+    m_pendingKill = kill;
+
+    // Propagate to children
+    for(auto* child : m_transform->m_children)
+        child->GetGameObject()->SetPendingKill(kill);
+
+    // Propaget to components
+    for(const auto& comp : m_components)
+        comp->SetPendingKill(kill);
+}
+
+bool GameObject::IsPendingKill() const
+{
+    return m_pendingKill;
 }

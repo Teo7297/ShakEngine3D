@@ -90,12 +90,12 @@ void Transform::SetDirtyRecursive()
         child->SetDirtyRecursive();
 }
 
-glm::mat4 Shak::Transform::GetLocalMatrix()
+glm::mat4 Shak::Transform::GetLocalMatrix() const
 {
     return m_localMatrix;
 }
 
-glm::mat4 Transform::GetGlobalMatrix()
+glm::mat4 Transform::GetGlobalMatrix() const
 {
     return m_globalMatrix;
 }
@@ -128,7 +128,7 @@ void Transform::SetParent(Transform* parent)
     m_parent = parent;
 }
 
-Transform* Transform::GetParent()
+Transform* Transform::GetParent() const
 {
     return m_parent;
 }
@@ -137,6 +137,18 @@ void Transform::AddChild(Transform* child)
 {
     m_children.emplace_back(child);
     child->SetParent(this);
+}
+
+std::vector<Transform*> Transform::GetChildren() const
+{
+    return m_children;
+}
+
+GameObject* Transform::GetGameObject() const
+{
+    if(m_ownerGameObject)
+        return m_ownerGameObject;
+    return nullptr;
 }
 
 void Transform::PrintGlobalMatrix()

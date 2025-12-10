@@ -2,6 +2,7 @@
 
 using namespace Shak;
 
+//TODO: use Direct State Access commands instead of legacy ones. they avoid having to bind the shaders!
 
 Shader::Shader()
     : m_program(0)
@@ -172,7 +173,9 @@ bool Shader::Link()
     GL_CHECK(glAttachShader(m_program, m_shaderData.fragment));
     GL_CHECK(glLinkProgram(m_program));
     GL_CHECK(glDeleteShader(m_shaderData.vertex));
+    m_shaderData.vertex = 0;
     GL_CHECK(glDeleteShader(m_shaderData.fragment));
+    m_shaderData.fragment = 0;
 
     return true;
 }
@@ -184,12 +187,14 @@ void Shader::SetMVP(MatrixBlock matrices)
 
 void Shader::SetUniformFloat(GLuint loc, float value)
 {
-    GL_CHECK(glUniform1f(loc, value));
+    if(m_program)
+        GL_CHECK(glProgramUniform1f(m_program, loc, value));
 }
 
 void Shader::SetUniformInt(GLuint loc, int value)
 {
-    GL_CHECK(glUniform1i(loc, value));
+    if(m_program)
+        GL_CHECK(glProgramUniform1i(m_program, loc, value));
 }
 
 GLuint Shader::CreateShaderHandle(Type type)
