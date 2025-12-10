@@ -116,12 +116,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
 
     scene = std::make_shared<Scene>();
-    camera = scene->CreateGameObject<TestCamera>("camera");
+    camera = (TestCamera*)scene->CreateGameObject<TestCamera>("camera").gameObject;
     camera->AddComponent<CameraComponent>("CamComp");
     camera->GetTransform()->SetPosition(glm::vec3(0, 0, 20));
 
-    cube = scene->CreateGameObject<TestCube>("cube");
-    camera->cube = cube;
+    auto cubeHandle = scene->CreateGameObject<TestCube>("cube");
+    cube = (TestCube*)cubeHandle.gameObject;
+    camera->cube = cubeHandle;
 
     return SDL_APP_CONTINUE;
 }
@@ -171,8 +172,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     renderer.Setup(static_cast<CameraComponent*>(camera->GetComponentsByType<CameraComponent>()[0]));
 
     auto validCube = scene->FindGameObjectByName("cube");
-    if(validCube)
-        ((TestCube*)validCube)->meshComp->Draw(renderer);
+    if(validCube.gameObject)
+        ((TestCube*)validCube.gameObject)->meshComp->Draw(renderer);
     renderer.Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -191,6 +192,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     AppState* as = (AppState*)appstate;
+
+    scene.reset(); //! Important to destroy the scene before closing the app (which closes the opengl state before calling other destructors)
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();

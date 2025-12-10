@@ -15,6 +15,13 @@ Scene::~Scene()
 
 }
 
+bool Scene::IsGameObjectValid(const GameObjectHandle& handle)
+{
+    return
+        m_gameObjectHandles.contains(handle.watermark) &&
+        m_gameObjectHandles[handle.watermark] == handle.gameObject;
+}
+
 void Scene::RegisterComponent(Component* comp)
 {
     m_pendingComponentsAdd.emplace_back(comp);
@@ -25,8 +32,17 @@ void Scene::UnregisterComponent(Component* comp)
     std::erase_if(m_components, [&](auto* c) {return c == comp;});
 }
 
-void Scene::DestroyGameObject(GameObject* toDestroy)
+void Scene::DestroyGameObject(GameObjectHandle handle)
 {
+    // 1. Check validity
+    if(!this->IsGameObjectValid(handle))
+        return;
+
+    // 2. Invalidate
+    m_gameObjectHandles.erase(handle.watermark);
+
+    // 3. Apply destroy logic
+    auto* toDestroy = handle.gameObject;
     for(auto* child : toDestroy->GetTransform()->GetChildren())
         m_pendingDestroy.emplace_back(child->GetGameObject());
     m_pendingDestroy.emplace_back(toDestroy);
@@ -34,16 +50,12 @@ void Scene::DestroyGameObject(GameObject* toDestroy)
     toDestroy->SetPendingKill(true); // This marks itself, its components and children recursively 
 }
 
-GameObject* Scene::FindGameObjectByName(const std::string& name)
+GameObjectHandle Scene::FindGameObjectByName(const std::string& name)
 {
-    for(const auto& go : m_gameObjects)
-    {
-        if(go->m_name == name)
-        {
-            return go.get();
-        }
-    }
-    return nullptr;
+    for(const auto [wm, ptr] : m_gameObjectHandles)
+        if(ptr->GetName() == name)
+            return GameObjectHandle{ .watermark = wm, .gameObject = ptr };
+    return InvalidHandle;
 }
 
 void Scene::Update(float deltaTime)
@@ -145,4 +157,9 @@ void Scene::PostUpdateGameObjects()
         std::erase_if(m_gameObjects, [&](const auto& go) {return go.get() == toDestroy;});
     }
     m_pendingDestroy.clear();
+}
+
+int Scene::CreateWatermark()
+{
+    return rand() % 100001;
 }

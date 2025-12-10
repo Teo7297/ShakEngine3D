@@ -4,12 +4,10 @@
 
 namespace Shak
 {
-    typedef int GameObjectHandle;
-
     class Component;
     class GameObject;
 
-    struct GameObjectData
+    struct GameObjectHandle
     {
         int watermark;
         GameObject* gameObject;
@@ -22,8 +20,10 @@ namespace Shak
         Scene();
         virtual ~Scene();
 
+        bool IsGameObjectValid(const GameObjectHandle& handle);
+
         template<typename T>
-        T* CreateGameObject(const std::string& name)
+        GameObjectHandle CreateGameObject(const std::string& name)
         {
             static_assert(std::is_base_of<GameObject, T>::value, "T must be a GameObject");
 
@@ -40,28 +40,32 @@ namespace Shak
 
             m_pendingAdd.emplace_back(std::move(go));
 
-            auto& added = *(m_pendingAdd.end() - 1);
-            return (T*)added.get();
+            auto rawAdded = (m_pendingAdd.end() - 1)->get();
+            int watermark = this->CreateWatermark();
+
+            m_gameObjectHandles[watermark] = rawAdded;
+
+            return GameObjectHandle{ .watermark = watermark, .gameObject = rawAdded };
         }
 
-        void DestroyGameObject(GameObject* toDestroy);
+        void DestroyGameObject(GameObjectHandle handle);
 
         /// @brief Returns the first found GameObject with the given name
         /// @param name 
         /// @return GameObject*
-        GameObject* FindGameObjectByName(const std::string& name);
+        GameObjectHandle FindGameObjectByName(const std::string& name);
 
         template<typename T>
-        std::vector<T*> FindGameObjectsByType()
+        std::vector<GameObjectHandle> FindGameObjectsByType()
         {
             static_assert(std::is_base_of<GameObject, T>::value, "T must be a GameObject");
 
-            std::vector<T*> result;
-            for(const auto& go : m_gameObjects)
+            std::vector<GameObjectHandle> result;
+            for(const auto [wm, ptr] : m_gameObjectHandles)
             {
-                auto raw = dynamic_cast<T*>(go.get());
-                if(raw)
-                    result.push_back(raw);
+                auto* tPtr = dynamic_cast<T*>(ptr);
+                if(tPtr)
+                    result.emplace_back(GameObjectHandle{ .watermark = wm, .gameObject = ptr });
             }
             return result;
         }
@@ -76,12 +80,16 @@ namespace Shak
         void UpdateComponents(float deltaTime);
         /// @brief internal post update used to clean GameObjects state like pending components to destroy
         void PostUpdateGameObjects();
+        int CreateWatermark();
+
+    public:
+        GameObjectHandle InvalidHandle = GameObjectHandle{ .watermark = -1, .gameObject = nullptr };
 
     protected:
         std::vector<std::unique_ptr<GameObject>> m_gameObjects, m_pendingAdd;
         std::vector<GameObject*> m_pendingDestroy;
         std::vector<Component*> m_components, m_pendingComponentsAdd;
 
-        std::unordered_map<GameObjectHandle, GameObjectData> m_gameObjectHandles;
+        std::unordered_map<int, GameObject*> m_gameObjectHandles;
     };
 }

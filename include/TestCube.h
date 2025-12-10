@@ -123,8 +123,8 @@ public:
 
         if(key_states[SDL_SCANCODE_H])
         {
-            for(auto* found : m_scene->FindGameObjectsByType<TestCube>())
-                SDL_Log("%s", found->GetName().c_str());
+            for(auto handle : m_scene->FindGameObjectsByType<TestCube>())
+                SDL_Log("%s", handle.gameObject->GetName().c_str());
         }
     }
 

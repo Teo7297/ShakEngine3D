@@ -27,15 +27,23 @@ class TestCamera : public GameObject
 
         if(key_states[SDL_SCANCODE_SPACE])
         {
-            if(!cube) return; // THIS WON'T WORK. EITHER USE HANDLES OR BE CAREFUL WHEN DESTROYING OBJECTS!
+            if(!m_scene->IsGameObjectValid(cube)) return;
 
             m_scene->DestroyGameObject(cube);
-            cube = nullptr;
             SDL_Log("[Camera] done");
         }
+
+        if(key_states[SDL_SCANCODE_7])
+        {
+            if(m_scene->IsGameObjectValid(cube)) return;
+
+            cube = m_scene->CreateGameObject<TestCube>("cube");
+            SDL_Log("[Camera] created?");
+        }
+
 
     }
 
 public:
-    GameObject* cube;
+    GameObjectHandle cube;
 };
