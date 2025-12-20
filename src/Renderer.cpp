@@ -6,7 +6,10 @@ using namespace Shak;
 
 Renderer::Renderer()
     : m_renderQueue{}
+    , m_cameraSetThisFrame{ false }
 {
+    m_sceneData.viewProjectionMatrix = glm::identity<glm::mat4>();
+    m_sceneData.cameraPosition = glm::vec3(0.f);
 }
 
 Renderer::~Renderer()
@@ -19,6 +22,7 @@ void Renderer::Setup(CameraComponent* camera)
     // get camera data and set UBO for vp matrix
     m_sceneData.viewProjectionMatrix = camera->GetViewProjectionMatrix();
     m_sceneData.cameraPosition = camera->GetOwner()->GetTransform()->GetPosition();
+    m_cameraSetThisFrame = true;
 }
 
 void Renderer::Submit(RenderCommand command)
@@ -28,10 +32,12 @@ void Renderer::Submit(RenderCommand command)
 
 void Renderer::Render()
 {
-    auto V = glm::identity<glm::mat4>();
-    V = glm::translate(V, glm::vec3(0.f, 0.f, -6.f));
-
-    auto P = glm::perspective(glm::radians(45.0f), 800.f / 600.f, 0.1f, 100.0f);
+    if(!m_cameraSetThisFrame)
+    {
+        // TODO: render custom text on the background with a "NO CAMERAS" warning
+        SDL_LogWarn(0, "[Renderer] Camera not present!");
+        return;
+    }
 
     for(auto command : m_renderQueue)
     {
@@ -55,4 +61,5 @@ void Renderer::Render()
     }
 
     m_renderQueue.clear();
+    m_cameraSetThisFrame = false;
 }

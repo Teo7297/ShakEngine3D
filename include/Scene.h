@@ -27,8 +27,8 @@ namespace Shak
         {
             static_assert(std::is_base_of<GameObject, T>::value, "T must be a GameObject");
 
-            // This hack allows to call the protected/private constructor of gameObject since make_shared is templated.
-            auto go = std::unique_ptr<T>(new T());
+            //? This hack allows to call the protected/private constructor of gameObject since make_unique is templated.
+            std::unique_ptr<GameObject> go = std::unique_ptr<T>(new T());
 
             // Set metadata here
             go->m_scene = this;

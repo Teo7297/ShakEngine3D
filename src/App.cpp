@@ -117,7 +117,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     scene = std::make_shared<Scene>();
     camera = (TestCamera*)scene->CreateGameObject<TestCamera>("camera").gameObject;
-    camera->AddComponent<CameraComponent>("CamComp");
     camera->GetTransform()->SetPosition(glm::vec3(0, 0, 20));
 
     auto cubeHandle = scene->CreateGameObject<TestCube>("cube");
@@ -193,7 +192,7 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     AppState* as = (AppState*)appstate;
 
-    scene.reset(); //! Important to destroy the scene before closing the app (which closes the opengl state before calling other destructors)
+    scene.reset(); //! Important to destroy the scene before closing the app (which otherwise closes the opengl state before calling other destructors)
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();

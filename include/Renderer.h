@@ -43,5 +43,6 @@ namespace Shak
     private:
         std::vector<RenderCommand> m_renderQueue;
         SceneData m_sceneData;
+        bool m_cameraSetThisFrame;
     };
 }

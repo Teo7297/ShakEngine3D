@@ -8,6 +8,11 @@ using namespace Shak;
 
 class TestCamera : public GameObject
 {
+    void OnAwake() override
+    {
+        this->AddComponent<CameraComponent>("CamComp");
+    }
+
     void OnUpdate(float dt) override
     {
         const bool* key_states = SDL_GetKeyboardState(NULL);
