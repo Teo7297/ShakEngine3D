@@ -1,5 +1,5 @@
 {
-    "version": 3,
+    "version": 10,
     "configurePresets": [
         {
             "name": "vcpkg-msvc-ninjamulticonf",
@@ -7,15 +7,95 @@
             "description": "Target Windows using vcpkg, MSVC and Ninja Multi-Config",
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "cl.exe",
-                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "VCPKG_TARGET_TRIPLET": "x64-windows"
             },
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
             }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-debug",
+            "displayName": "Debug",
+            "description": "Builds the VCPKG MSVC Ninja Multi-Config preset with Debug configuration",
+            "configurePreset": "vcpkg-msvc-ninjamulticonf",
+            "configuration": "Debug"
+        },
+        {
+            "name": "build-relwithdebinfo",
+            "displayName": "RelWithDebInfo",
+            "description": "Builds the VCPKG MSVC Ninja Multi-Config preset with RelWithDebInfo configuration",
+            "configurePreset": "vcpkg-msvc-ninjamulticonf",
+            "configuration": "RelWithDebInfo"
+        },
+        {
+            "name": "build-release",
+            "displayName": "Release",
+            "description": "Builds the VCPKG MSVC Ninja Multi-Config preset with Release configuration",
+            "configurePreset": "vcpkg-msvc-ninjamulticonf",
+            "configuration": "Release"
+        },
+        {
+            "name": "build-minsizerel",
+            "displayName": "MinSizeRel",
+            "description": "Builds the VCPKG MSVC Ninja Multi-Config preset with MinSizeRel configuration",
+            "configurePreset": "vcpkg-msvc-ninjamulticonf",
+            "configuration": "MinSizeRel"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "test-vcpkg-msvc",
+            "description": "Test VCPKG MSVC Ninja Multi-Config",
+            "displayName": "Test VCPKG MSVC Ninja Multi-Config",
+            "configurePreset": "vcpkg-msvc-ninjamulticonf",
+            "inheritConfigureEnvironment": true,
+            "configuration": "RelWithDebInfo"
+        }
+    ],
+    "packagePresets": [
+        {
+            "name": "pkg-vcpkg-msvc",
+            "description": "",
+            "displayName": "EngineTestPkg",
+            "packageName": "EngineTest",
+            "configurePreset": "vcpkg-msvc-ninjamulticonf",
+            "generators": [
+                "Ninja Multi-Config"
+            ],
+            "configurations": [
+                "RelWithDebInfo"
+            ]
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "wf-test",
+            "description": "",
+            "displayName": "",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "vcpkg-msvc-ninjamulticonf"
+                },
+                {
+                    "type": "build",
+                    "name": "build-relwithdebinfo"
+                },
+                {
+                    "type": "test",
+                    "name": "test-vcpkg-msvc"
+                },
+                {
+                    "type": "package",
+                    "name": "pkg-vcpkg-msvc"
+                }
+            ]
         }
     ]
 }

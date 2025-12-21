@@ -40,7 +40,7 @@ std::vector<char> Shader::ReadBinaryFile(const fs::path& filename) const
 
     if(!is)
     {
-        SDL_LogError(0, "Failed to read binary file at path: %s", filename);
+        SDL_LogError(0, "Failed to read binary file at path: %s", filename.string().c_str());
         return buffer;
     }
 

@@ -15,9 +15,10 @@ find_package(GLEW REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 
+include(FetchContent)
 
-# Include ImGui configuration
-include(cmake/ImGuiCMakeLists.cmake)
+# Include and configure ImGui
+include(cmake/ImGui.cmake)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 

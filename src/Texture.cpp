@@ -25,7 +25,7 @@ bool Texture::LoadFromFile(const fs::path& filename, GLint format)
 
     if(!data)
     {
-        SDL_LogError(0, "[Texture] Could not load texture from %s", filename);
+        SDL_LogError(0, "[Texture] Could not load texture from %s", filename.string().c_str());
         return false;
     }
 
