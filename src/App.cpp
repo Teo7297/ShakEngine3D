@@ -44,7 +44,7 @@ static Renderer renderer;
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    SDL_SetAppMetadata("OpenGL 4.6 Learning", "1.0", "com.example.opengl46-learning");
+    SDL_SetAppMetadata("ShakEngine3D Demo", "1.0", "com.realishak.shakengine3d");
 
     if(!SDL_Init(SDL_INIT_VIDEO))
     {
@@ -69,7 +69,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    as->window = SDL_CreateWindow("OpenGL 4.6 Learning", 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    as->window = SDL_CreateWindow("ShakEngine3D Demo", 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if(!as->window)
     {
         SDL_Log("Couldn't create window: %s", SDL_GetError());
