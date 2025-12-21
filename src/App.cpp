@@ -16,6 +16,7 @@
 #include "Scene.h"
 #include "components/CameraComponent.h"
 #include "TestCube.h"
+#include "TestSkybox.h"
 #include "TestCamera.h"
 #include "Renderer.h"
 
@@ -39,6 +40,7 @@ static const struct {
 static std::shared_ptr<Scene> scene;
 static TestCamera* camera;
 static TestCube* cube;
+static GameObjectHandle skybox;
 static Renderer renderer;
 
 /* This function runs once at startup. */
@@ -123,6 +125,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     cube = (TestCube*)cubeHandle.gameObject;
     camera->cube = cubeHandle;
 
+    skybox = scene->CreateGameObject<TestSkybox>("Skybox");
+
     return SDL_APP_CONTINUE;
 }
 
@@ -170,10 +174,17 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 
     renderer.Setup(static_cast<CameraComponent*>(camera->GetComponentsByType<CameraComponent>()[0]));
 
+    //# //////////////////////////////////////////
+    // TODO: render automatically scene->renderer
     auto validCube = scene->FindGameObjectByName("cube");
     if(validCube.gameObject)
         ((TestCube*)validCube.gameObject)->meshComp->Draw(renderer);
+
+    if(scene->IsGameObjectValid(skybox))
+        ((TestSkybox*)skybox.gameObject)->meshComp->Draw(renderer);
+
     renderer.Render();
+    //# //////////////////////////////////////////
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

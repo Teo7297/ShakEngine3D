@@ -23,6 +23,7 @@ void Renderer::Setup(CameraComponent* camera)
     m_sceneData.viewProjectionMatrix = camera->GetViewProjectionMatrix();
     m_sceneData.cameraPosition = camera->GetOwner()->GetTransform()->GetPosition();
     m_cameraSetThisFrame = true;
+    m_camera = camera;
 }
 
 void Renderer::Submit(RenderCommand command)
@@ -39,25 +40,57 @@ void Renderer::Render()
         return;
     }
 
+    MatrixBlock mvp =
+    {
+        .viewProjection = m_sceneData.viewProjectionMatrix
+    };
+
+    RenderCommand skyboxRC;
+    bool skyboxSet = false;
     for(auto command : m_renderQueue)
     {
-        MatrixBlock mvp =
+        if(command.isSkybox)
         {
-            .model = command.modelMatrix,
-            .viewProjection = m_sceneData.viewProjectionMatrix
-        };
+            skyboxRC = command; // we deal with this as last
+            skyboxSet = true;
+            continue;
+        }
+
+        mvp.model = command.modelMatrix;
 
         auto shader = command.material->GetShader();
         shader->Bind();
         shader->SetMVP(mvp);
-        // shader->SetUniformFloat(0, (float)SDL_GetTicks());
-        shader->SetUniformInt(1, 0);
-        // shader->SetUniformInt(2, 1);
+        shader->SetUniformInt(shader->GetUniformLocation("uTexture"), 0);
 
         command.material->BindTextures();
-
         command.mesh->Bind();
-        GL_CHECK(glDrawElements(GL_TRIANGLES, command.mesh->GetIndicesCount(), GL_UNSIGNED_INT, 0));
+
+        GL_CHECK(glDrawElements(command.renderMode, command.mesh->GetIndicesCount(), GL_UNSIGNED_INT, 0));
+    }
+
+    if(skyboxSet)
+    {
+        auto v = m_camera->GetViewMatrix();
+        v = glm::mat4(glm::mat3(v));
+        mvp.viewProjection = m_camera->GetProjectionMatrix() * v;
+
+        //? change depth function so depth test passes when values are equal to depth buffer's content
+        GL_CHECK(glDepthFunc(GL_LEQUAL));
+        GL_CHECK(glCullFace(GL_FRONT));
+
+        auto shader = skyboxRC.material->GetShader();
+        shader->Bind();
+        shader->SetMVP(mvp);
+        shader->SetUniformInt(shader->GetUniformLocation("uTexture"), 0);
+
+        skyboxRC.material->BindTextures();
+
+        skyboxRC.mesh->Bind();
+        GL_CHECK(glDrawElements(GL_TRIANGLES, skyboxRC.mesh->GetIndicesCount(), GL_UNSIGNED_INT, 0));
+
+        GL_CHECK(glDepthFunc(GL_LESS));
+        GL_CHECK(glCullFace(GL_BACK));
     }
 
     m_renderQueue.clear();

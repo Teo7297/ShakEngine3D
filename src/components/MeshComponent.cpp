@@ -8,6 +8,7 @@
 using namespace Shak;
 
 MeshComponent::MeshComponent()
+    : m_isSkybox{ false }
 {
 }
 
@@ -32,7 +33,9 @@ void MeshComponent::Draw(Renderer& renderer)
     {
         .mesh = m_mesh.get(),
         .material = m_material.get(),
-        .modelMatrix = m_transform->GetGlobalMatrix()
+        .modelMatrix = m_transform->GetGlobalMatrix(),
+        .isSkybox = m_isSkybox,
+        .renderMode = GL_TRIANGLES
     };
 
     renderer.Submit(rc);

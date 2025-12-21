@@ -1,12 +1,12 @@
 #include "Texture.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 using namespace Shak;
 
 Texture::Texture()
     : m_textureID{ 0 }
+    , m_glTextureType{ GL_TEXTURE_2D }
 {
 
 }
@@ -16,7 +16,7 @@ Texture::~Texture()
     glDeleteTextures(1, &m_textureID);
 }
 
-bool Texture::LoadFromFile(const fs::path& filename, GLint format)
+bool Texture::LoadFromFile(const fs::path& filename)
 {
     stbi_set_flip_vertically_on_load(true);
 
@@ -29,16 +29,18 @@ bool Texture::LoadFromFile(const fs::path& filename, GLint format)
         return false;
     }
 
+    auto format = nrChannels == 3 ? GL_RGB : GL_RGBA;
+
     GL_CHECK(glGenTextures(1, &m_textureID));
-    GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureID));
+    GL_CHECK(glBindTexture(m_glTextureType, m_textureID));
 
-    GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-    GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-    GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
-    GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    GL_CHECK(glTexParameteri(m_glTextureType, GL_TEXTURE_WRAP_S, GL_REPEAT));
+    GL_CHECK(glTexParameteri(m_glTextureType, GL_TEXTURE_WRAP_T, GL_REPEAT));
+    GL_CHECK(glTexParameteri(m_glTextureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+    GL_CHECK(glTexParameteri(m_glTextureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
-    GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data));
-    GL_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+    GL_CHECK(glTexImage2D(m_glTextureType, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data));
+    GL_CHECK(glGenerateMipmap(m_glTextureType));
 
     stbi_image_free(data);
 
@@ -47,5 +49,5 @@ bool Texture::LoadFromFile(const fs::path& filename, GLint format)
 
 void Texture::Bind()
 {
-    GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_textureID));
+    GL_CHECK(glBindTexture(m_glTextureType, m_textureID));
 }

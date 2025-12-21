@@ -35,6 +35,7 @@ namespace Shak
         bool CreateFromString(Type type, const std::string& code);
         bool Link();
 
+        GLint GetUniformLocation(const std::string& name);
         void SetMVP(MatrixBlock matrices); // TODO: remove data copy
         void SetUniformFloat(GLuint loc, float value);
         void SetUniformInt(GLuint loc, int value);

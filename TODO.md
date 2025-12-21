@@ -1,5 +1,6 @@
 # Rendering
-- [ ] Skybox
+- [x] Skybox
+- [ ] The scene should automatically call Draw on renderables
 - [ ] better shader/material customization (improve renderer flexibility with shaders)
 - [ ] Lights (phong)
 - [ ] Light types (spotlight, point light, directional)

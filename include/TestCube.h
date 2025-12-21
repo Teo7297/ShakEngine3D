@@ -10,9 +10,10 @@
 #include "components/TestComponent.h"
 
 using namespace Shak;
-
+class TestCube : public GameObject
+{
 /* Cube vertices with colors (position XYZ, color RGB) */
-static std::vector<float> vertices = {
+std::vector<float> vertices = {
     // Front face (red)
     // x, y, z, r, g, b, u, v
     -1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, // Bottom-left
@@ -51,7 +52,7 @@ static std::vector<float> vertices = {
        -1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f  // Top-left
 };
 
-static std::vector<unsigned int> indices = {
+std::vector<unsigned int> indices = {
     0,  1,  2,  2,  3,  0,   // Front
     4,  5,  6,  6,  7,  4,   // Back
     8,  9, 10, 10, 11,  8,   // Top
@@ -60,17 +61,16 @@ static std::vector<unsigned int> indices = {
    20, 21, 22, 22, 23, 20    // Left
 };
 
-class TestCube : public GameObject
-{
+
 public:
-    TestCube() { m_active = true; }
+    TestCube() {}
     ~TestCube() override {
         SDL_Log("Destroyed cube!");
     }
 
     void OnAwake() override
     {
-        auto mesh = std::make_shared<Mesh>(vertices, indices);
+        auto mesh = std::make_shared<Mesh>(vertices, indices, true, true);
 
         auto shader = std::make_shared<Shader>();
         shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/test.vert.spv");
@@ -78,13 +78,13 @@ public:
         shader->Link();
 
         auto texture = std::make_shared<Texture>();
-        texture->LoadFromFile("../../assets/wall.jpg", GL_RGB);
+        texture->LoadFromFile("../../assets/wall.jpg");
 
         auto material = std::make_shared<Material>();
         material->SetShader(shader);
         material->AddTexture(texture);
 
-        meshComp = (MeshComponent*)this->AddComponent<MeshComponent>("MeshComp");
+        meshComp = (MeshComponent*)this->AddComponent<MeshComponent>("MeshCompCube");
         meshComp->SetMesh(std::move(mesh));
         meshComp->SetMaterial(std::move(material));
     }
@@ -125,6 +125,14 @@ public:
         {
             for(auto handle : m_scene->FindGameObjectsByType<TestCube>())
                 SDL_Log("%s", handle.gameObject->GetName().c_str());
+        }
+
+        if(key_states[SDL_SCANCODE_SPACE])
+        {
+            auto up = this->GetTransform()->Up();
+            auto dir = glm::normalize(glm::vec3(0) - this->GetTransform()->GetPosition());
+            this->GetTransform()->SetRotation(dir, up);
+            // this->GetTransform()->SetRotation(this->GetTransform()->GetPosition(), glm::vec3(0), up);
         }
     }
 

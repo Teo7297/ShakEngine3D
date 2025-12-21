@@ -8,11 +8,12 @@ namespace Shak
     {
     public:
         Texture();
-        ~Texture();
-        bool LoadFromFile(const fs::path& filename, GLint format);
+        virtual ~Texture();
+        virtual bool LoadFromFile(const fs::path& filename);
         void Bind();
 
-    private:
+    protected:
         GLuint m_textureID;
+        GLint m_glTextureType;
     };
 }

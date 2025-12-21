@@ -17,10 +17,13 @@ namespace Shak
 
         void SetMesh(std::shared_ptr<Mesh> mesh);
         void SetMaterial(std::shared_ptr<Material> material);
+        void SetIsSkybox(bool flag) { m_isSkybox = flag; }
 
         void Draw(Renderer& renderer);
+        
     private:
         std::shared_ptr<Mesh> m_mesh;
         std::shared_ptr<Material> m_material;
+        bool m_isSkybox;
     };
 }

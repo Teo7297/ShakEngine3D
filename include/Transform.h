@@ -31,6 +31,10 @@ namespace Shak
         glm::mat4 GetGlobalMatrix() const;
         void UpdateMatrices(const glm::mat4& parentGlobalMatrix);
 
+        glm::vec3 Front();
+        glm::vec3 Right();
+        glm::vec3 Up();
+
         void SetParent(Transform* parent);
         Transform* GetParent() const;
 
@@ -46,6 +50,7 @@ namespace Shak
 
     private:
         void Decompose();
+        void UpdateVectors();
 
     private:
         glm::mat4 m_localMatrix, m_globalMatrix;
@@ -55,11 +60,15 @@ namespace Shak
         glm::quat m_dirtyRotation;
         glm::vec3  m_dirtyScale;
 
+        bool m_localMatrixUpdated;
         glm::vec3 m_scale;
         glm::quat m_rotation;
         glm::vec3 m_translation;
         glm::vec3 m_skew;
         glm::vec4 m_perspective;
+        glm::vec3 m_front;
+        glm::vec3 m_right;
+        glm::vec3 m_up;
 
         // Hierarchy
         Transform* m_parent;

@@ -2,10 +2,12 @@
 
 using namespace Shak;
 
-Mesh::Mesh(std::vector<float> vertices, std::vector<GLuint> indices)
+Mesh::Mesh(std::vector<float> vertices, std::vector<GLuint> indices, bool hasColors, bool hasTextureCoords)
     :
     m_vertices{ std::move(vertices) },
-    m_indices{ std::move(indices) }
+    m_indices{ std::move(indices) },
+    m_hasColors{ hasColors },
+    m_hasTextureCoords{ hasTextureCoords }
 {
     InitGLBuffers();
 }
@@ -46,6 +48,9 @@ void Mesh::InitGLBuffers()
     GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
     GL_CHECK(glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(float), m_vertices.data(), GL_DYNAMIC_DRAW));
 
+    GLsizei stride = (3 + (m_hasColors ? 3 : 0) + (m_hasTextureCoords ? 2 : 0)) * sizeof(float);
+    size_t offset = 0;
+
     // Position attribute
     GLuint attribCount = 0;
     GL_CHECK(glVertexAttribPointer(
@@ -53,32 +58,41 @@ void Mesh::InitGLBuffers()
         3,
         GL_FLOAT,
         GL_FALSE,
-        8 * sizeof(float),
-        (void*)0
+        stride,
+        (void*)offset
     ));
     GL_CHECK(glEnableVertexAttribArray(attribCount++));
+    offset += 3 * sizeof(float);
 
     // Color attribute
-    GL_CHECK(glVertexAttribPointer(
-        attribCount,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(float),
-        (void*)(3 * sizeof(float))
-    ));
-    GL_CHECK(glEnableVertexAttribArray(attribCount++));
+    if(m_hasColors)
+    {
+        GL_CHECK(glVertexAttribPointer(
+            attribCount,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            (void*)offset
+        ));
+        GL_CHECK(glEnableVertexAttribArray(attribCount++));
+        offset += 3 * sizeof(float);
+    }
 
     // Texture coordinates
-    GL_CHECK(glVertexAttribPointer(
-        attribCount,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(float),
-        (void*)(6 * sizeof(float))
-    ));
-    GL_CHECK(glEnableVertexAttribArray(attribCount++));
+    if(m_hasTextureCoords)
+    {
+        GL_CHECK(glVertexAttribPointer(
+            attribCount,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            (void*)offset
+        ));
+        GL_CHECK(glEnableVertexAttribArray(attribCount++));
+        offset += 2 * sizeof(float);
+    }
 
     // EBO, pass in the indices data
     GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo));

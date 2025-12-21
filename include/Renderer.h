@@ -13,6 +13,8 @@ namespace Shak
         Mesh* mesh;
         Material* material;
         glm::mat4 modelMatrix;
+        bool isSkybox;
+        GLint renderMode;
 
         // Helper for sorting
         bool operator<(const RenderCommand& other) const {
@@ -44,5 +46,6 @@ namespace Shak
         std::vector<RenderCommand> m_renderQueue;
         SceneData m_sceneData;
         bool m_cameraSetThisFrame;
+        CameraComponent* m_camera;
     };
 }

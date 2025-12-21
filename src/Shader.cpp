@@ -180,6 +180,13 @@ bool Shader::Link()
     return true;
 }
 
+GLint Shader::GetUniformLocation(const std::string& name)
+{
+    GLint loc;
+    GL_CHECK(loc = glGetUniformLocation(m_program, name.c_str()));
+    return loc;
+}
+
 void Shader::SetMVP(MatrixBlock matrices)
 {
     GL_CHECK(glNamedBufferSubData(m_ubo, 0, sizeof(MatrixBlock), &matrices));
@@ -187,14 +194,14 @@ void Shader::SetMVP(MatrixBlock matrices)
 
 void Shader::SetUniformFloat(GLuint loc, float value)
 {
-    if(m_program)
-        GL_CHECK(glProgramUniform1f(m_program, loc, value));
+    if(!m_program) return;
+    GL_CHECK(glProgramUniform1f(m_program, loc, value));
 }
 
 void Shader::SetUniformInt(GLuint loc, int value)
 {
-    if(m_program)
-        GL_CHECK(glProgramUniform1i(m_program, loc, value));
+    if(!m_program) return;
+    GL_CHECK(glProgramUniform1i(m_program, loc, value));
 }
 
 GLuint Shader::CreateShaderHandle(Type type)

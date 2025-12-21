@@ -8,7 +8,7 @@ namespace Shak
     {
     public:
         // Data should be passed with std::move in here
-        Mesh(std::vector<float> vertices, std::vector<GLuint> indices);
+        Mesh(std::vector<float> vertices, std::vector<GLuint> indices, bool hasColors, bool hasTextureCoords);
         ~Mesh();
         void Bind();
         int GetIndicesCount();
@@ -20,5 +20,6 @@ namespace Shak
         std::vector<float> m_vertices;
         std::vector<GLuint> m_indices;
         GLuint m_vao, m_vbo, m_ebo;
+        bool m_hasColors, m_hasTextureCoords;
     };
 }

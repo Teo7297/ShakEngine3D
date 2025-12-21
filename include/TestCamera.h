@@ -10,7 +10,7 @@ class TestCamera : public GameObject
 {
     void OnAwake() override
     {
-        this->AddComponent<CameraComponent>("CamComp");
+        camComp = this->AddComponent<CameraComponent>("CamComp");
     }
 
     void OnUpdate(float dt) override
@@ -30,25 +30,21 @@ class TestCamera : public GameObject
         if(key_states[SDL_SCANCODE_Q])
             this->GetTransform()->Move(glm::vec3(0, -1, 0) * speed * dt);
 
-        if(key_states[SDL_SCANCODE_SPACE])
-        {
-            if(!m_scene->IsGameObjectValid(cube)) return;
 
-            m_scene->DestroyGameObject(cube);
-            SDL_Log("[Camera] done");
+        if(key_states[SDL_SCANCODE_M])
+        {
+            glm::vec3 eulerAngles(glm::radians(0.f), glm::radians(-2.f), glm::radians(0.f));
+            this->GetTransform()->Rotate(glm::quat(eulerAngles));
         }
 
-        if(key_states[SDL_SCANCODE_7])
+        if(key_states[SDL_SCANCODE_N])
         {
-            if(m_scene->IsGameObjectValid(cube)) return;
-
-            cube = m_scene->CreateGameObject<TestCube>("cube");
-            SDL_Log("[Camera] created?");
+            glm::vec3 eulerAngles(glm::radians(0.f), glm::radians(2.f), glm::radians(0.f));
+            this->GetTransform()->Rotate(glm::quat(eulerAngles));
         }
-
-
     }
 
 public:
     GameObjectHandle cube;
+    CameraComponent* camComp;
 };
