@@ -12,54 +12,54 @@
 using namespace Shak;
 class TestCube : public GameObject
 {
-/* Cube vertices with colors (position XYZ, color RGB) */
-std::vector<float> vertices = {
-    // Front face (red)
-    // x, y, z, r, g, b, u, v
-    -1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, // Bottom-left
-     1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, // Bottom-right
-     1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f, // Top-right
-    -1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f, // Top-left
+    /* Cube vertices with colors (position XYZ, color RGB) */
+    std::vector<float> vertices = {
+        // Front face (red)
+        // x, y, z, r, g, b, u, v
+        -1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, // Bottom-left
+         1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f, // Bottom-right
+         1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f, // Top-right
+        -1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f, // Top-left
 
-    // Back face (green)
-    -1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // Bottom-right (relative to front)
-    -1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f, // Top-right
-     1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, // Top-left
-     1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // Bottom-left
+        // Back face (green)
+        -1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // Bottom-right (relative to front)
+        -1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f, // Top-right
+         1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, // Top-left
+         1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // Bottom-left
 
-     // Top face (blue)
-     -1.0f,  1.0f, -1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f, // Top-left
-     -1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, // Bottom-left
-      1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f, // Bottom-right
-      1.0f,  1.0f, -1.0f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f, // Top-right
+         // Top face (blue)
+         -1.0f,  1.0f, -1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f, // Top-left
+         -1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, // Bottom-left
+          1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f, // Bottom-right
+          1.0f,  1.0f, -1.0f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f, // Top-right
 
-      // Bottom face (yellow)
-      -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,  0.0f, 0.0f, // Bottom-left
-       1.0f, -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f, // Bottom-right
-       1.0f, -1.0f,  1.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, // Top-right
-      -1.0f, -1.0f,  1.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f, // Top-left
+          // Bottom face (yellow)
+          -1.0f, -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,  0.0f, 0.0f, // Bottom-left
+           1.0f, -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f, // Bottom-right
+           1.0f, -1.0f,  1.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f, // Top-right
+          -1.0f, -1.0f,  1.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f, // Top-left
 
-      // Right face (magenta)
-       1.0f, -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, // Bottom-right
-       1.0f,  1.0f, -1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 1.0f, // Top-right
-       1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f, // Top-left
-       1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f, // Bottom-left
+          // Right face (magenta)
+           1.0f, -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f, // Bottom-right
+           1.0f,  1.0f, -1.0f,  1.0f, 0.0f, 1.0f,  1.0f, 1.0f, // Top-right
+           1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f, // Top-left
+           1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f, // Bottom-left
 
-       // Left face (cyan)
-       -1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 0.0f, // Bottom-left
-       -1.0f, -1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f, // Bottom-right
-       -1.0f,  1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  1.0f, 1.0f, // Top-right
-       -1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f  // Top-left
-};
+           // Left face (cyan)
+           -1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 0.0f, // Bottom-left
+           -1.0f, -1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f, // Bottom-right
+           -1.0f,  1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  1.0f, 1.0f, // Top-right
+           -1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f  // Top-left
+    };
 
-std::vector<unsigned int> indices = {
-    0,  1,  2,  2,  3,  0,   // Front
-    4,  5,  6,  6,  7,  4,   // Back
-    8,  9, 10, 10, 11,  8,   // Top
-   12, 13, 14, 14, 15, 12,   // Bottom
-   16, 17, 18, 18, 19, 16,   // Right
-   20, 21, 22, 22, 23, 20    // Left
-};
+    std::vector<unsigned int> indices = {
+        0,  1,  2,  2,  3,  0,   // Front
+        4,  5,  6,  6,  7,  4,   // Back
+        8,  9, 10, 10, 11,  8,   // Top
+       12, 13, 14, 14, 15, 12,   // Bottom
+       16, 17, 18, 18, 19, 16,   // Right
+       20, 21, 22, 22, 23, 20    // Left
+    };
 
 
 public:
@@ -129,10 +129,7 @@ public:
 
         if(key_states[SDL_SCANCODE_SPACE])
         {
-            auto up = this->GetTransform()->Up();
-            auto dir = glm::normalize(glm::vec3(0) - this->GetTransform()->GetPosition());
-            this->GetTransform()->SetRotation(dir, up);
-            // this->GetTransform()->SetRotation(this->GetTransform()->GetPosition(), glm::vec3(0), up);
+            this->GetTransform()->RotateTowards(glm::vec3(0));
         }
     }
 

@@ -17,12 +17,13 @@ namespace Shak
         glm::vec3 GetScale();
 
         void SetPosition(const glm::vec3& newPosition);
-        void SetRotation(const glm::vec3& eye, const glm::vec3& target, const glm::vec3& up);
-        void SetRotation(const glm::vec3& direction, const glm::vec3& up);
+        void RotateTowards(const glm::vec3& target);
+        void SetRotation(const glm::quat& direction);
         void SetScale(const glm::vec3& newScale);
 
         void Move(const glm::vec3& offset);
         void Rotate(const glm::quat& offset);
+        void Rotate(float radians, const glm::vec3& axis);
         void Scale(const glm::vec3& offset);
 
         void SetDirtyRecursive();
@@ -51,6 +52,7 @@ namespace Shak
     private:
         void Decompose();
         void UpdateVectors();
+        void ApplyRotationImmediately(const glm::mat4& rotationMatrix);
 
     private:
         glm::mat4 m_localMatrix, m_globalMatrix;

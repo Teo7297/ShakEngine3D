@@ -45,51 +45,50 @@ void Transform::SetPosition(const glm::vec3& newPosition)
     this->SetDirtyRecursive();
 }
 
-void Transform::SetRotation(const glm::vec3& eye, const glm::vec3& target, const glm::vec3& up)
-{
-    auto dir = target - eye;
-    auto dirLen = glm::length(dir);
-    if(dirLen < 0.0001f) return;
 
-    auto dirNormalized = dir * (1.f / dirLen);
+void Transform::RotateTowards(const glm::vec3& target) {
+    const glm::vec3 pos = this->GetPosition();
+    const glm::vec3 diff = target - pos;
+    const float len = glm::length(diff);
 
-    this->SetRotation(dirNormalized, up);
+    // Check for near-zero distance
+    if(len < 1e-6f) return;
+
+    const glm::vec3 up = this->Up();  // Assume normalized
+    const glm::vec3 dir = glm::normalize(diff);  // GLM normalizes automatically
+
+    // Check for up-direction alignment (avoid singularity)
+    const float dot = glm::dot(up, dir);
+    if(std::abs(dot) > 1.0f - 1e-6f) {
+        // Optional: Handle fallback (e.g., use a different up vector)
+        return;
+    }
+
+    // Create quaternion using GLM's look-at (assumes right-handed; use quatLookAtLH for left-handed)
+    glm::quat lookQuat = glm::quatLookAt(dir, up);
+
+    // Normalize (ensure unit quaternion)
+    lookQuat = glm::normalize(lookQuat);
+
+    // Convert to matrix and apply
+    glm::mat4 rotationMatrix = glm::mat4_cast(lookQuat);
+    this->ApplyRotationImmediately(rotationMatrix);
 }
 
-void Transform::SetRotation(const glm::vec3& direction, const glm::vec3& up)
-{
-    // 1. Define the Basis Vectors
-    // Normalize the target direction
-    glm::vec3 zAxis = -direction; // Align Local -Z (Forward) with direction
+void Transform::SetRotation(const glm::quat& direction) {
+    // Check for degenerate quaternion (near-zero length)
+    const float epsilon = 1e-6f;
+    if(glm::length(direction) < epsilon)
+        return;
 
-    // Calculate Right (X) and Up (Y)
-    glm::vec3 xAxis = glm::normalize(glm::cross(up, zAxis));
-    glm::vec3 yAxis = glm::cross(zAxis, xAxis);
+    // Normalize the quaternion to ensure it's unit-length
+    glm::quat normalizedQuat = glm::normalize(direction);
 
-    // 2. Update the rotation part of the matrix directly
-    // GLM is column-major: mat4[col][row]
+    // Convert to 4x4 matrix
+    glm::mat4 lookAtMatrix = glm::mat4_cast(normalizedQuat);
 
-    // Column 0: Right (X)
-    m_localMatrix[0][0] = xAxis.x;
-    m_localMatrix[0][1] = xAxis.y;
-    m_localMatrix[0][2] = xAxis.z;
-
-    // Column 1: Up (Y)
-    m_localMatrix[1][0] = yAxis.x;
-    m_localMatrix[1][1] = yAxis.y;
-    m_localMatrix[1][2] = yAxis.z;
-
-    // Column 2: Backward (Z)
-    m_localMatrix[2][0] = zAxis.x;
-    m_localMatrix[2][1] = zAxis.y;
-    m_localMatrix[2][2] = zAxis.z;
-
-    // Column 3 (Position) is left untouched
-
-    // 3. Clear pending dirty rotation to avoid double application
-    m_dirtyRotation = glm::identity<glm::quat>();
-
-    m_localMatrixUpdated = true;
+    // Apply the rotation immediately
+    this->ApplyRotationImmediately(lookAtMatrix);
 }
 
 void Transform::SetScale(const glm::vec3& newScale)
@@ -108,6 +107,11 @@ void Transform::Rotate(const glm::quat& offset)
 {
     m_dirtyRotation = offset * m_dirtyRotation; // reverse order!
     this->SetDirtyRecursive();
+}
+
+void Transform::Rotate(float radians, const glm::vec3& axis)
+{
+    this->Rotate(glm::angleAxis(radians, axis));
 }
 
 void Transform::Scale(const glm::vec3& offset)
@@ -238,4 +242,29 @@ void Transform::UpdateVectors()
     m_front = m_rotation * glm::vec3(0, 0, -1);
     m_right = m_rotation * glm::vec3(1, 0, 0);
     m_up = m_rotation * glm::vec3(0, 1, 0);
+}
+
+void Transform::ApplyRotationImmediately(const glm::mat4& rotationMatrix)
+{
+    // Column 0: Right (X)
+    m_localMatrix[0][0] = rotationMatrix[0][0];
+    m_localMatrix[0][1] = rotationMatrix[0][1];
+    m_localMatrix[0][2] = rotationMatrix[0][2];
+
+    // Column 1: Up (Y)
+    m_localMatrix[1][0] = rotationMatrix[1][0];
+    m_localMatrix[1][1] = rotationMatrix[1][1];
+    m_localMatrix[1][2] = rotationMatrix[1][2];
+
+    // Column 2: Backward (Z)
+    m_localMatrix[2][0] = rotationMatrix[2][0];
+    m_localMatrix[2][1] = rotationMatrix[2][1];
+    m_localMatrix[2][2] = rotationMatrix[2][2];
+
+    // Column 3 (Position) is left untouched
+
+    // 3. Clear pending dirty rotation to avoid double application
+    m_dirtyRotation = glm::identity<glm::quat>();
+
+    m_localMatrixUpdated = true;
 }
