@@ -75,9 +75,12 @@ public:
 
         auto* am = m_scene->GetAssetManager();
         auto shader = am->GetShader("test");
-        shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/test.vert.spv");
-        shader->CreateFromBinaryFile(Shader::Type::Fragment, "../shaders/test.frag.spv");
-        shader->Link();
+        if(!shader->IsLinked())
+        {
+            shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/test.vert.spv");
+            shader->CreateFromBinaryFile(Shader::Type::Fragment, "../shaders/test.frag.spv");
+            shader->Link();
+        }
 
         auto texture = am->GetTexture("test");
         texture->LoadFromFile("../../assets/wall.jpg");

@@ -1,5 +1,6 @@
 #include "SceneManager.h"
 #include "Renderer.h"
+#include "AssetManager.h"
 
 using namespace Shak;
 
@@ -42,6 +43,7 @@ void SceneManager::StartSceneLoading()
     if(it != m_scenes.end())
     {
         m_activeScene.reset();
+        m_appContext.assetManager->ClearSceneData();
 
         m_activeScene = it->second();
 

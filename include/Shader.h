@@ -34,6 +34,7 @@ namespace Shak
         bool CreateFromTextFile(Type type, const fs::path& filename);
         bool CreateFromString(Type type, const std::string& code);
         bool Link();
+        bool IsLinked() { return m_program > 0; }
 
         GLint GetUniformLocation(const std::string& name);
         void SetMVP(MatrixBlock matrices); // TODO: remove data copy
