@@ -3,7 +3,6 @@
 #include "Material.h"
 #include "Shader.h"
 #include "Component.h"
-#include "Scene.h"
 
 using namespace Shak;
 struct MatrixBlock {
@@ -73,11 +72,6 @@ void GameObject::DestroyAllComponents()
 {
     for(const auto& comp : m_components)
         comp->SetPendingKill(true);
-}
-
-void GameObject::RegisterComponentOnScene(Component* comp)
-{
-    m_scene->RegisterComponent(comp);
 }
 
 void GameObject::OnPostUpdate()

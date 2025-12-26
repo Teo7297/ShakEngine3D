@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include "Transform.h"
 #include "Scene.h"
+#include "components/CameraComponent.h"
 
 using namespace Shak;
 
@@ -11,12 +12,13 @@ class TestCamera : public GameObject
     void OnAwake() override
     {
         camComp = this->AddComponent<CameraComponent>("CamComp");
+        m_scene->SetMainCamera(camComp);
     }
 
     void OnUpdate(float dt) override
     {
         const bool* key_states = SDL_GetKeyboardState(NULL);
-        static float speed = 5.f;
+        static float speed = 15.f;
         if(key_states[SDL_SCANCODE_D])
             this->GetTransform()->Move(glm::vec3(1, 0, 0) * speed * dt);
         if(key_states[SDL_SCANCODE_A])
@@ -45,6 +47,5 @@ class TestCamera : public GameObject
     }
 
 public:
-    GameObjectHandle cube;
     CameraComponent* camComp;
 };

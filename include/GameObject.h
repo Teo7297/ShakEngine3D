@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Includes.h"
+#include "Scene.h"
 
 namespace Shak
 {
     class Transform;
     class Material;
     class Component;
-    class Scene;
     class GameObject
     {
         friend class Scene; // This allows to have only scene to have access to the constructor
@@ -39,7 +39,7 @@ namespace Shak
             comp->SetName(name);
             comp->SetActive(true);
             comp->OnAwake();
-            this->RegisterComponentOnScene(comp.get());
+            m_scene->RegisterComponent(comp.get());
             return (T*)this->AttachComponent(std::move(comp));
         }
 
@@ -68,12 +68,12 @@ namespace Shak
         virtual void OnAwake() {}
         virtual void OnStart() {}
         virtual void OnUpdate(float deltaTime) {}
+        virtual void ProcessEvent(SDL_Event event) {};
         virtual void OnLateUpdate(float deltaTime) {}
         virtual void OnDestroy() {}
 
 
     private:
-        void RegisterComponentOnScene(Component* comp);
         void OnPostUpdate();
         Component* AttachComponent(std::unique_ptr<Component> component);
 

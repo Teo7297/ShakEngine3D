@@ -4,21 +4,28 @@
 
 namespace Shak
 {
+    class Texture;
+    class Shader;
     class Material
     {
     public:
         Material();
-        ~Material();
-        int AddTexture(const std::shared_ptr<class Texture>& texture);
-        void SetShader(const std::shared_ptr<class Shader>& shader);
+        virtual ~Material();
+        int AddTexture(Texture* texture);
+        void SetShader(Shader* shader);
 
-        std::shared_ptr<class Texture> GetTexture(int index) const;
-        std::shared_ptr<class Shader> GetShader() const;
+        Texture* GetTexture(int index) const;
+        Shader* GetShader() const;
 
+        /// @brief Uploads the texture uniforms to the shader.
+        /// Texture names are uTexture for texture 0, then uTextureN where N is the # of the texture slot (1,2,3,etc)
+        void SetTextureUniforms();
         void BindTextures();
 
+        virtual void SetInstanceSpecificUniforms() {}
+
     private:
-        std::vector<std::shared_ptr<class Texture>> m_textures;
-        std::shared_ptr<class Shader> m_shader;
+        std::vector<Texture*> m_textures;
+        Shader* m_shader;
     };
 }

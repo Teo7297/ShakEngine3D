@@ -14,18 +14,18 @@ Material::~Material()
 
 }
 
-int Material::AddTexture(const std::shared_ptr<Texture>& texture)
+int Material::AddTexture(Texture* texture)
 {
     m_textures.emplace_back(texture);
     return m_textures.size() - 1;
 }
 
-void Material::SetShader(const std::shared_ptr<Shader>& shader)
+void Material::SetShader(Shader* shader)
 {
     m_shader = shader;
 }
 
-std::shared_ptr<Texture> Shak::Material::GetTexture(int index) const
+Texture* Material::GetTexture(int index) const
 {
     if(index >= m_textures.size())
     {
@@ -35,9 +35,20 @@ std::shared_ptr<Texture> Shak::Material::GetTexture(int index) const
     return m_textures[index];
 }
 
-std::shared_ptr<Shader> Shak::Material::GetShader() const
+Shader* Material::GetShader() const
 {
     return m_shader;
+}
+
+void Material::SetTextureUniforms()
+{
+    for(int slot = 0; slot < m_textures.size(); slot++)
+    {
+        std::string uniformName = "uTexture";
+        if(slot > 0)
+            uniformName.append(std::to_string(slot));
+        m_shader->SetUniformInt(m_shader->GetUniformLocation("uTexture"), 0);
+    }
 }
 
 void Material::BindTextures()

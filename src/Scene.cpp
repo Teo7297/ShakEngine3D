@@ -2,6 +2,13 @@
 #include "GameObject.h"
 #include "Transform.h"
 #include "Component.h"
+#include "components/CameraComponent.h"
+#include "Renderer.h"
+#include "AssetManager.h"
+#include "SceneManager.h"
+#include "UIManager.h"
+#include "interfaces/IRenderable.h"
+#include "interfaces/IAppControl.h"
 
 using namespace Shak;
 
@@ -25,11 +32,18 @@ bool Scene::IsGameObjectValid(const GameObjectHandle& handle)
 void Scene::RegisterComponent(Component* comp)
 {
     m_pendingComponentsAdd.emplace_back(comp);
+    IRenderable* iren = dynamic_cast<IRenderable*>(comp);
+    if(iren)
+        m_renderables.emplace_back(iren);
 }
 
 void Scene::UnregisterComponent(Component* comp)
 {
     std::erase_if(m_components, [&](auto* c) {return c == comp;});
+
+    IRenderable* iren = dynamic_cast<IRenderable*>(comp);
+    if(iren)
+        std::erase_if(m_renderables, [&](auto* c) {return c == iren;});
 }
 
 void Scene::DestroyGameObject(GameObjectHandle handle)
@@ -58,11 +72,28 @@ GameObjectHandle Scene::FindGameObjectByName(const std::string& name)
     return InvalidHandle;
 }
 
-void Scene::Update(float deltaTime)
+void Scene::Update(Renderer* renderer, float deltaTime)
 {
+    // Logic update
     UpdateGameObjects(deltaTime);
     UpdateComponents(deltaTime);
     PostUpdateGameObjects();
+
+    // Renderer update
+    renderer->Setup(m_mainCamera);
+    for(auto* renderable : m_renderables)
+        renderable->Draw(renderer);
+}
+
+void Scene::ProcessEvent(SDL_Event event)
+{
+    for(auto& go : m_gameObjects)
+    {
+        if(!go->IsActive())
+            continue;
+
+        go->ProcessEvent(event);
+    }
 }
 
 void Scene::UpdateTransformHierarchy()
@@ -74,6 +105,46 @@ void Scene::UpdateTransformHierarchy()
         if(tx->GetParent() == nullptr)
             tx->UpdateMatrices(glm::identity<glm::mat4>());
     }
+}
+
+CameraComponent* Scene::GetMainCamera()
+{
+    return m_mainCamera;
+}
+
+void Scene::SetMainCamera(CameraComponent* camera)
+{
+    m_mainCamera = camera;
+}
+
+void Scene::SetAppContext(AppContext& ctx)
+{
+    m_appContext = ctx;
+}
+
+AssetManager* Scene::GetAssetManager()
+{
+    return m_appContext.assetManager;
+}
+
+SceneManager* Scene::GetSceneManager()
+{
+    return m_appContext.sceneManager;
+}
+
+UIManager* Scene::GetUIManager()
+{
+    return m_appContext.uiManager;
+}
+
+Renderer* Scene::GetRenderer()
+{
+    return m_appContext.renderer;
+}
+
+IAppControl* Shak::Scene::GetAppControl()
+{
+    return m_appContext.appControl;
 }
 
 void Scene::UpdateGameObjects(float deltaTime)

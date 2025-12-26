@@ -77,6 +77,7 @@ bool Shader::Bind()
 {
     if(!m_program)
         return false;
+
     GL_CHECK(glUseProgram(m_program));
 
     if(m_ubo)

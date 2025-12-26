@@ -12,6 +12,7 @@ namespace Shak
 
     class Shader
     {
+        friend class AssetManager;
     private:
         struct ShadersData
         {
@@ -27,7 +28,6 @@ namespace Shak
         };
 
     public:
-        Shader();
         ~Shader();
         bool Bind();
         bool CreateFromBinaryFile(Type type, const fs::path& filename);
@@ -41,6 +41,7 @@ namespace Shak
         void SetUniformInt(GLuint loc, int value);
 
     private:
+        Shader();
         std::vector<char> ReadBinaryFile(const fs::path& filename) const;
         std::string ReadTextFile(const fs::path& filename) const;
         GLuint CreateShaderHandle(Type type);

@@ -8,6 +8,7 @@ namespace Shak
     {
     public:
         // Data should be passed with std::move in here
+        Mesh() = default;
         Mesh(std::vector<float> vertices, std::vector<GLuint> indices, bool hasColors, bool hasTextureCoords);
         ~Mesh();
         void Bind();

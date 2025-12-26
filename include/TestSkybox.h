@@ -8,6 +8,7 @@
 #include "Shader.h"
 #include "CubeMap.h"
 #include "components/TestComponent.h"
+#include "AssetManager.h"
 
 using namespace Shak;
 
@@ -65,23 +66,24 @@ class TestSkybox : public GameObject
 
     void OnAwake() override
     {
-        auto mesh = std::make_shared<Mesh>(vertices, indices, false, false);
+        auto mesh = new Mesh(vertices, indices, false, false);
 
-        auto shader = std::make_shared<Shader>();
+        auto* am = m_scene->GetAssetManager();
+        auto shader = am->GetShader("test2");
         shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/cubemap.vert.spv");
         shader->CreateFromBinaryFile(Shader::Type::Fragment, "../shaders/cubemap.frag.spv");
         shader->Link();
 
-        auto texture = std::make_shared<CubeMap>();
+        auto texture = am->GetCubeMap("test2");
         texture->LoadFromFile("../../assets/cubemap.png");
 
-        auto material = std::make_shared<Material>();
+        auto material = new Material();
         material->SetShader(shader);
         material->AddTexture(texture);
 
-        meshComp = (MeshComponent*)this->AddComponent<MeshComponent>("MeshCompSky");
-        meshComp->SetMesh(std::move(mesh));
-        meshComp->SetMaterial(std::move(material));
+        auto meshComp = (MeshComponent*)this->AddComponent<MeshComponent>("MeshCompCube");
+        meshComp->SetMesh(mesh);
+        meshComp->SetMaterial(material);
         meshComp->SetIsSkybox(true);
     }
 
@@ -90,5 +92,4 @@ class TestSkybox : public GameObject
     }
 
 public:
-    MeshComponent* meshComp;
 };

@@ -6,6 +6,13 @@ namespace Shak
 {
     class Component;
     class GameObject;
+    class CameraComponent;
+    class AssetManager;
+    class SceneManager;
+    class UIManager;
+    class Renderer;
+    class IRenderable;
+    class IAppControl;
 
     struct GameObjectHandle
     {
@@ -16,6 +23,7 @@ namespace Shak
     class Scene
     {
         friend class GameObject;
+        friend class SceneManager;
     public:
         Scene();
         virtual ~Scene();
@@ -70,8 +78,21 @@ namespace Shak
             return result;
         }
 
-        void Update(float deltaTime);
+        void Update(Renderer* renderer, float deltaTime);
+        void ProcessEvent(SDL_Event event);
         void UpdateTransformHierarchy();
+
+        virtual void Init() {};
+
+        CameraComponent* GetMainCamera();
+        void SetMainCamera(CameraComponent* camera);
+
+        void SetAppContext(AppContext& ctx);
+        AssetManager* GetAssetManager();
+        SceneManager* GetSceneManager();
+        UIManager* GetUIManager();
+        Renderer* GetRenderer();
+        IAppControl* GetAppControl();
 
     private:
         void RegisterComponent(Component* comp);
@@ -91,5 +112,9 @@ namespace Shak
         std::vector<Component*> m_components, m_pendingComponentsAdd;
 
         std::unordered_map<int, GameObject*> m_gameObjectHandles;
+        CameraComponent* m_mainCamera;
+        std::vector<IRenderable*> m_renderables;
+
+        AppContext m_appContext;
     };
 }

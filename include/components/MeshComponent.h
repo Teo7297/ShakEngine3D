@@ -2,28 +2,28 @@
 
 #include "Includes.h"
 #include "Component.h"
+#include "interfaces/IRenderable.h"
 
 namespace Shak
 {
     class Mesh;
     class Material;
     class Renderer;
-    class MeshComponent : public Component
+    class MeshComponent : public Component, public IRenderable
     {
     public:
-        //TODO: use raw ptrs here. leave ownership to resource manager!
         MeshComponent();
         ~MeshComponent() override;
 
-        void SetMesh(std::shared_ptr<Mesh> mesh);
-        void SetMaterial(std::shared_ptr<Material> material);
-        void SetIsSkybox(bool flag) { m_isSkybox = flag; }
+        void SetMesh(Mesh* mesh);
+        void SetMaterial(Material* material);
+        void SetIsSkybox(bool flag) { m_isSkybox = flag; } // TODO: maybe we can put this in another IRenderable 
 
-        void Draw(Renderer& renderer);
+        void Draw(Renderer* renderer) override;
         
     private:
-        std::shared_ptr<Mesh> m_mesh;
-        std::shared_ptr<Material> m_material;
+        Mesh* m_mesh;
+        Material* m_material;
         bool m_isSkybox;
     };
 }

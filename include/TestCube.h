@@ -8,6 +8,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "components/TestComponent.h"
+#include "AssetManager.h"
 
 using namespace Shak;
 class TestCube : public GameObject
@@ -70,23 +71,24 @@ public:
 
     void OnAwake() override
     {
-        auto mesh = std::make_shared<Mesh>(vertices, indices, true, true);
+        auto mesh = new Mesh(vertices, indices, true, true);
 
-        auto shader = std::make_shared<Shader>();
+        auto* am = m_scene->GetAssetManager();
+        auto shader = am->GetShader("test");
         shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/test.vert.spv");
         shader->CreateFromBinaryFile(Shader::Type::Fragment, "../shaders/test.frag.spv");
         shader->Link();
 
-        auto texture = std::make_shared<Texture>();
+        auto texture = am->GetTexture("test");
         texture->LoadFromFile("../../assets/wall.jpg");
 
-        auto material = std::make_shared<Material>();
+        auto material = new Material();
         material->SetShader(shader);
         material->AddTexture(texture);
 
         meshComp = (MeshComponent*)this->AddComponent<MeshComponent>("MeshCompCube");
-        meshComp->SetMesh(std::move(mesh));
-        meshComp->SetMaterial(std::move(material));
+        meshComp->SetMesh(mesh);
+        meshComp->SetMaterial(material);
     }
 
     int frame = 0;
@@ -130,6 +132,19 @@ public:
         if(key_states[SDL_SCANCODE_SPACE])
         {
             this->GetTransform()->RotateTowards(glm::vec3(0));
+        }
+    }
+
+    void ProcessEvent(SDL_Event event)
+    {
+        if(event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_ESCAPE)
+        {
+            m_scene->GetAppControl()->Stop();
+        }
+
+        if(event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_8)
+        {
+            m_scene->GetSceneManager()->LoadScene("2");
         }
     }
 

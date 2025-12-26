@@ -40,7 +40,8 @@ namespace Shak
         ~Renderer();
         void Setup(CameraComponent* camera);
         void Submit(RenderCommand command);
-        void Render();
+        void RenderScene();
+        void RenderUI();
 
     private:
         std::vector<RenderCommand> m_renderQueue;
