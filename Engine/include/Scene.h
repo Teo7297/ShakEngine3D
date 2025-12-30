@@ -25,8 +25,10 @@ namespace Shak
         friend class GameObject;
         friend class SceneManager;
     public:
-        Scene();
         virtual ~Scene();
+
+        std::string GetName();
+        void SetName(const std::string& name);
 
         bool IsGameObjectValid(const GameObjectHandle& handle);
 
@@ -35,8 +37,7 @@ namespace Shak
         {
             static_assert(std::is_base_of<GameObject, T>::value, "T must be a GameObject");
 
-            //? This hack allows to call the protected/private constructor of gameObject since make_unique is templated.
-            std::unique_ptr<GameObject> go = std::unique_ptr<T>(new T());
+            std::unique_ptr<GameObject> go = std::unique_ptr<T>(new T()); //? we use this manual new "hack" for portability even though it works with MSVC.
 
             // Set metadata here
             go->m_scene = this;
@@ -94,7 +95,8 @@ namespace Shak
         Renderer* GetRenderer();
         IAppControl* GetAppControl();
 
-    private:
+    protected:
+        Scene();
         void RegisterComponent(Component* comp);
         void UnregisterComponent(Component* comp);
         void UpdateGameObjects(float deltaTime);
@@ -107,6 +109,7 @@ namespace Shak
         GameObjectHandle InvalidHandle = GameObjectHandle{ .watermark = -1, .gameObject = nullptr };
 
     protected:
+        std::string m_name;
         std::vector<std::unique_ptr<GameObject>> m_gameObjects, m_pendingAdd;
         std::vector<GameObject*> m_pendingDestroy;
         std::vector<Component*> m_components, m_pendingComponentsAdd;

@@ -13,6 +13,16 @@
 using namespace Shak;
 
 Scene::Scene()
+    : m_name{ "Unnamed scene" },
+    m_gameObjects{},
+    m_pendingAdd{},
+    m_pendingDestroy{},
+    m_components{},
+    m_pendingComponentsAdd{},
+    m_gameObjectHandles{},
+    m_mainCamera{ nullptr },
+    m_renderables{},
+    m_appContext{}
 {
 
 }
@@ -20,6 +30,16 @@ Scene::Scene()
 Scene::~Scene()
 {
 
+}
+
+std::string Scene::GetName()
+{
+    return m_name;
+}
+
+void Scene::SetName(const std::string& name)
+{
+    m_name = name;
 }
 
 bool Scene::IsGameObjectValid(const GameObjectHandle& handle)

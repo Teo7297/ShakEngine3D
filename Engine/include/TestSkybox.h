@@ -70,12 +70,12 @@ class TestSkybox : public GameObject
 
         auto* am = m_scene->GetAssetManager();
         auto shader = am->GetShader("test2");
-        shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/cubemap.vert.spv");
-        shader->CreateFromBinaryFile(Shader::Type::Fragment, "../shaders/cubemap.frag.spv");
+        shader->CreateFromBinaryFile(Shader::Type::Vertex, "../../Engine/shaders/cubemap.vert.spv");
+        shader->CreateFromBinaryFile(Shader::Type::Fragment, "../../Engine/shaders/cubemap.frag.spv");
         shader->Link();
 
         auto texture = am->GetCubeMap("test2");
-        texture->LoadFromFile("../../assets/cubemap.png");
+        texture->LoadFromFile("../../../Engine/assets/cubemap.png");
 
         auto material = new Material();
         material->SetShader(shader);

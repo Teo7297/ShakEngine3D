@@ -77,13 +77,13 @@ public:
         auto shader = am->GetShader("test");
         if(!shader->IsLinked())
         {
-            shader->CreateFromBinaryFile(Shader::Type::Vertex, "../shaders/test.vert.spv");
-            shader->CreateFromBinaryFile(Shader::Type::Fragment, "../shaders/test.frag.spv");
+            shader->CreateFromBinaryFile(Shader::Type::Vertex, "../../Engine/shaders/test.vert.spv");
+            shader->CreateFromBinaryFile(Shader::Type::Fragment, "../../Engine/shaders/test.frag.spv");
             shader->Link();
         }
 
         auto texture = am->GetTexture("test");
-        texture->LoadFromFile("../../assets/wall.jpg");
+        texture->LoadFromFile("../../../Engine/assets/wall.jpg");
 
         auto material = new Material();
         material->SetShader(shader);
@@ -148,6 +148,10 @@ public:
         if(event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_8)
         {
             m_scene->GetSceneManager()->LoadScene("2");
+        }
+        if(event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_7)
+        {
+            m_scene->GetSceneManager()->LoadScene("1");
         }
     }
 

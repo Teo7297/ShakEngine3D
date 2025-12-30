@@ -1,44 +1,18 @@
 cmake_minimum_required(VERSION 4.2.0)
 
-project(ShakEngine3D VERSION 1.0 LANGUAGES CXX)
+project(ShakWorkspace)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(SDL3 CONFIG REQUIRED)
-find_package(SDL3_image CONFIG REQUIRED)
-find_package(SDL3_ttf CONFIG REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(glm CONFIG REQUIRED)
-find_package(Stb REQUIRED)
+# Output directories (so Editor.exe finds Engine.dll easily)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include(FetchContent)
-
-# Include and configure ImGui
-include(cmake/ImGui.cmake)
-
-file(GLOB_RECURSE SOURCES src/*.cpp)
-
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-target_include_directories(${PROJECT_NAME} PRIVATE
-    include
-    ${Stb_INCLUDE_DIR}
-)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    SDL3::SDL3
-    $<IF:$<TARGET_EXISTS:SDL3_image::SDL3_image-shared>,SDL3_image::SDL3_image-shared,SDL3_image::SDL3_image-static>
-    SDL3_ttf::SDL3_ttf
-    OpenGL::GL
-    GLEW::GLEW
-    glm::glm-header-only
-    ImGui
-)
-
-# Simple script for shaders compilation to spirv, will populate "SHADERS_TARGET" target to use as dependency
-include(${CMAKE_SOURCE_DIR}/cmake/CompileShadersSpirv.cmake)
-add_dependencies(${PROJECT_NAME} ${SHADERS_TARGET})
+# Add the sub-projects
+add_subdirectory(Engine)
+add_subdirectory(Editor)
+# add_subdirectory(SandboxGame)

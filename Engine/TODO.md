@@ -1,9 +1,7 @@
-# Working On
-- [ ] scene manager
+## Colors meaning
+- <span style="color:yellow;">Yellow</span> = WIP
+- <span style="color:red;">Red</span> = Blocked
 ## Notes 
-Added some improvements to the render loop. Now the cubes are instantiating a new shader each.
-The ResManager should solve this issue. After that, check that the renderer is not binding the shaders after the first!
-Also Material should gradually become a virtual class, then maybe create a couple of "default" instances to plug&play.
 
 ## Next
 GUI first implementation/integration. We need to have a fast way to change settings and instantiate objects.
@@ -26,17 +24,18 @@ GUI first implementation/integration. We need to have a fast way to change setti
 - [ ] Physics engine integration (bullet3?)
 
 # Editor
-- [ ] Editor to Runtime workflow
-- [ ] Basic imgui editor layout
+- [ ] <span style="color:yellow;">Editor to Runtime workflow</span>
+- [ ] <span style="color:yellow;">Basic imgui editor layout</span>
+- [ ] Virtual filesystem / Resource folder into binary folder / whatever to load assets from disk without hardcoded relative paths
 - [ ] Create Prefabs in the editor, dynamically add the attached scripts, Drag&Drop them into scene
 - [ ] Mouse click objects selection (check out ogldev video)
 - [ ] Basic gizmos
 - [ ] Debugging and profiling utils
 
 # Engine Utils
-- [ ] assimp integration
+- [ ] <span style="color:yellow;">assimp integration</span>
 - [ ] animations (via assimp import)
-- [ ] scene manager
+- [x] scene manager
 - [ ] GLTF for easily storing scenes
 - [ ] Networking (experiment)
 - [ ] LoD

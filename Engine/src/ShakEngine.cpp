@@ -69,7 +69,7 @@ void ShakEngine::SetResolution(int w, int h)
     // TODO:
 }
 
-AppContext& Shak::ShakEngine::GetAppContext()
+AppContext& ShakEngine::GetAppContext()
 {
     return m_appContext;
 }

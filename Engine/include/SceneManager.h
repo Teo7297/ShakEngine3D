@@ -15,12 +15,15 @@ namespace Shak
         SceneManager();
         ~SceneManager() = default;
 
-        void RegisterScene(const std::string& name, SceneFactory factory)
+        template<typename T>
+        void RegisterScene(const std::string& name)
         {
-            m_scenes[name] = factory;
+            static_assert(std::is_base_of<Scene, T>::value, "T must derive from Scene");
+            m_scenes[name] = []() {return std::unique_ptr<T>(new T());}; //? we use this manual new "hack" for portability even though it works with MSVC.
         }
 
         void LoadScene(const std::string& name);
+        void ReloadActiveScene();
 
         Scene* GetActiveScene();
 

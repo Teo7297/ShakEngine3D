@@ -35,7 +35,7 @@ namespace Shak
         {
             static_assert(std::is_base_of<Component, T>::value, "T must be a Component");
 
-            auto comp = std::make_unique<T>();
+            auto comp = std::unique_ptr<T>(new T()); //? we use this manual new "hack" for portability even though it works with MSVC.
             comp->SetName(name);
             comp->SetActive(true);
             comp->OnAwake();
