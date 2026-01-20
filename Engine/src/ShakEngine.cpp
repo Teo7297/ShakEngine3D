@@ -64,11 +64,6 @@ void ShakEngine::Stop()
     m_shouldStop = true;
 }
 
-void ShakEngine::SetResolution(int w, int h)
-{
-    // TODO:
-}
-
 AppContext& ShakEngine::GetAppContext()
 {
     return m_appContext;
@@ -123,8 +118,10 @@ void ShakEngine::InitSDL(const std::vector<AppMetadata>& metadata, const char* w
     if(resizable)
         windowFlags |= SDL_WINDOW_RESIZABLE;
     SDL_CHECK(m_window = SDL_CreateWindow(windowName, winWidth, winHeight, windowFlags));
+    m_appContext.window = m_window;
 
     SDL_CHECK(m_GLContext = SDL_GL_CreateContext(m_window));
+    m_appContext.glContext = &m_GLContext;
 
     if(syncType < -1 || syncType > 1)
     {
@@ -149,6 +146,9 @@ void ShakEngine::InitImGui()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+
+    m_appContext.imguiContext = ImGui::GetCurrentContext();
+
     auto& io = ImGui::GetIO();
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;

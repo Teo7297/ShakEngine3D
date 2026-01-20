@@ -24,9 +24,13 @@ namespace Shak
         void Init(const std::vector<AppMetadata>& metadata, const char* windowName, int winWidth, int winHeight, bool resizable, int syncType);
         void Start();
         void Stop() override;
-        void SetResolution(int w, int h) override;
 
         AppContext& GetAppContext();
+
+        /// Clear engine owned resources
+        void FreeResources();
+
+        float GetDeltaTime();
 
     private:
         void Update();
@@ -34,8 +38,6 @@ namespace Shak
         void InitGlew();
         void InitImGui();
         void LogGLVersion();
-        void FreeResources();
-        float GetDeltaTime();
 
     private:
         SDL_Window* m_window;

@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# find_package(assimp CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -19,5 +19,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ShakEngine3D
-    # assimp::assimp
+    assimp::assimp
 )

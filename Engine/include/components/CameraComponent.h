@@ -11,11 +11,19 @@ namespace Shak
         // Projection Settings
         glm::mat4 m_projectionMatrix;
         float m_fov = 45.0f;
-        float m_aspectRatio = 800.f / 600.f;
+        float m_aspectRatio = 1920.f / 1080.f;
         float m_nearClip = 0.1f;
         float m_farClip = 100.0f;
 
     public:
+        void Init(float fov = 45.f, float aspectRatio = 1920.f / 1080.f, float nearClip = 0.1f, float farClip = 100.f)
+        {
+            m_fov = fov;
+            m_aspectRatio = aspectRatio;
+            m_nearClip = nearClip;
+            m_farClip = farClip;
+        }
+
         void OnAwake() override {
             RecalculateProjection();
         }
