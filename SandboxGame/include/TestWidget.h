@@ -12,18 +12,18 @@ class TestWidget : public UIWidget
 {
     std::vector<float> vertices =
     {
-        //  x    y    r     g     b
-            0.f, 0.f, 1.0f, 0.0f, 0.0f,
-            0.f, 1.f, 1.0f, 0.0f, 0.0f,
-            1.f, 1.f, 1.0f, 0.0f, 0.0f,
-            1.f, 0.f, 1.0f, 0.0f, 0.0f
+        //  x    y    z    r     g     b
+            0.f, 0.f, 0.f, 1.0f, 0.0f, 0.0f,
+            0.f, 1.f, 0.f, 1.0f, 0.0f, 0.0f,
+            1.f, 1.f, 0.f, 1.0f, 0.0f, 0.0f,
+            1.f, 0.f, 0.f, 1.0f, 0.0f, 0.0f
     };
 
     std::vector<unsigned int> indices =
     {
         0, 1, 2, 0, 2, 3
     };
-
+public:
     void Initialize() override
     {
         m_mesh = new Mesh(vertices, indices, true, false);

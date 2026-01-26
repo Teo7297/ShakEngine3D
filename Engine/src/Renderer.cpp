@@ -129,7 +129,6 @@ void Renderer::RenderScene()
     m_renderQueue.clear();
 }
 
-
 void Renderer::RenderUI()
 {
     GL_CHECK(glDisable(GL_DEPTH_TEST));
@@ -155,7 +154,8 @@ void Renderer::RenderUI()
 
     for(auto command : m_uiRenderQueue)
     {
-        mvp.model = glm::translate(glm::mat4(1.0f), glm::vec3(command.screenCoords.x, command.screenCoords.y, 0.0f));
+        mvp.model = glm::translate(glm::mat4(1.0f), glm::vec3(command.screenCoords.x, command.screenCoords.y, 0.0f)) *
+            glm::scale(glm::mat4(1.0f), glm::vec3(300.f));
 
         auto shader = command.material->GetShader();
 

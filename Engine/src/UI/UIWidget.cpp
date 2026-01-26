@@ -34,6 +34,16 @@ bool UIWidget::IsActive()
     return m_active;
 }
 
+void UIWidget::SetName(const std::string& name)
+{
+    m_name = name;
+}
+
+std::string UIWidget::GetName()
+{
+    return m_name;
+}
+
 void UIWidget::Draw(Renderer* renderer)
 {
     renderer->Submit({

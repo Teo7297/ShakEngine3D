@@ -5,7 +5,8 @@ using namespace Shak;
 
 void UIManager::Update(float deltaTime)
 {
-    m_activeLayer->Update(deltaTime);
+    if(m_activeLayer)
+        m_activeLayer->Update(deltaTime);
 }
 
 void UIManager::ProcessEvent(SDL_Event event)
@@ -15,7 +16,8 @@ void UIManager::ProcessEvent(SDL_Event event)
 
 void UIManager::Render(Renderer* renderer)
 {
-    m_activeLayer->Render(renderer);
+    if(m_activeLayer)
+        m_activeLayer->Render(renderer);
 }
 
 void UIManager::ActivateLayer(const std::string& name)

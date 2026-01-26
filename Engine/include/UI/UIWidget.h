@@ -19,6 +19,9 @@ namespace Shak
         void SetActive(bool flag);
         bool IsActive();
 
+        void SetName(const std::string& name);
+        std::string GetName();
+
         void Draw(Renderer* renderer) override;
 
     protected:
@@ -27,6 +30,7 @@ namespace Shak
         virtual void OnDeactivate();
 
     protected:
+        std::string m_name = "";
         bool m_active = false;
         Mesh* m_mesh;
         Material* m_material;

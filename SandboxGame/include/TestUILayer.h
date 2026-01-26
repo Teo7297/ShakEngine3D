@@ -8,6 +8,7 @@ using namespace Shak;
 
 class TestUILayer : public UILayer
 {
+public:
     void Initialize() override
     {
         auto* widget = this->AddWidget<TestWidget>("TestWidget");

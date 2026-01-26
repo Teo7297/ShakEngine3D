@@ -42,7 +42,7 @@ namespace Shak
 
         void RecalculateProjection() {
             m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_aspectRatio, m_nearClip, m_farClip);
-            m_UIProjectionMatrix = glm::ortho(0, m_width, m_height, 0, -1, 1);
+            m_UIProjectionMatrix = glm::ortho(0.f, (float)m_width, (float)m_height, 0.f, -1.f, 1.f);
         }
 
         const glm::mat4& GetProjectionMatrix() const {

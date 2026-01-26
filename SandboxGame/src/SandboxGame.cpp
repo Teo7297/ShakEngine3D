@@ -3,7 +3,7 @@
 #include <SceneManager.h>
 #include <UI/UIManager.h>
 #include <Renderer.h>
-#include <scenes/TestScene.h>
+#include "TestSceneSB.h"
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -20,8 +20,7 @@ int main()
     ImGui::SetCurrentContext(ctx.imguiContext);
 
     auto* sm = ctx.sceneManager;
-    sm->RegisterScene<TestScene>("1");
-    sm->RegisterScene<TestScene>("2");
+    sm->RegisterScene<TestSceneSB>("1");
     sm->LoadScene("1");
 
     engine.Start();

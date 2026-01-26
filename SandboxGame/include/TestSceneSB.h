@@ -9,11 +9,11 @@
 
 #include "TestUILayer.h"
 
-class TestScene : public Scene
+class TestSceneSB : public Scene
 {
 public:
-    TestScene() = default;
-    ~TestScene() override
+    TestSceneSB() = default;
+    ~TestSceneSB() override
     {
         SDL_Log("Destroyed!");
     };
@@ -31,5 +31,6 @@ public:
         CreateGameObject<TestSkybox>("sky");
 
         auto* layer = m_appContext.uiManager->CreateUILayer<TestUILayer>("TestUILayer");
+        m_appContext.uiManager->ActivateLayer("TestUILayer");
     }
 };
