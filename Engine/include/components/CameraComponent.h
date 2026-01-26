@@ -6,31 +6,29 @@
 
 namespace Shak
 {
-    class CameraComponent : public Component {
-    private:
-        // Projection Settings
-        glm::mat4 m_projectionMatrix;
-        float m_fov = 45.0f;
-        float m_aspectRatio = 1920.f / 1080.f;
-        float m_nearClip = 0.1f;
-        float m_farClip = 100.0f;
-
+    class CameraComponent : public Component
+    {
     public:
-        void Init(float fov = 45.f, float aspectRatio = 1920.f / 1080.f, float nearClip = 0.1f, float farClip = 100.f)
+        void Init(float fov = 45.f, int width = 1920, int height = 1080, float nearClip = 0.1f, float farClip = 100.f)
         {
             m_fov = fov;
-            m_aspectRatio = aspectRatio;
+            m_aspectRatio = width / height;
+            m_width = width;
+            m_height = height;
             m_nearClip = nearClip;
             m_farClip = farClip;
         }
 
-        void OnAwake() override {
+        void OnAwake() override
+        {
             RecalculateProjection();
         }
 
-        void SetPerspective(float fov, float aspect, float nearClip, float farClip) {
+        void SetPerspective(float fov, int width, int height, float nearClip, float farClip) {
             m_fov = fov;
-            m_aspectRatio = aspect;
+            m_aspectRatio = width / height;
+            m_width = width;
+            m_height = height;
             m_nearClip = nearClip;
             m_farClip = farClip;
             RecalculateProjection();
@@ -44,10 +42,15 @@ namespace Shak
 
         void RecalculateProjection() {
             m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_aspectRatio, m_nearClip, m_farClip);
+            m_UIProjectionMatrix = glm::ortho(0, m_width, m_height, 0, -1, 1);
         }
 
         const glm::mat4& GetProjectionMatrix() const {
             return m_projectionMatrix;
+        }
+
+        const glm::mat4& GetUIProjectionMatrix() const {
+            return m_UIProjectionMatrix;
         }
 
         // CRITICAL: The View Matrix is the INVERSE of the Transform Matrix
@@ -61,5 +64,18 @@ namespace Shak
         glm::mat4 GetViewProjectionMatrix() const {
             return m_projectionMatrix * GetViewMatrix();
         }
+
+    private:
+        // Projection Settings
+        glm::mat4 m_projectionMatrix;
+        glm::mat4 m_UIProjectionMatrix;
+        int m_width = 1920;
+        int m_height = 1080;
+        float m_fov = 45.0f;
+        float m_aspectRatio = 1920.f / 1080.f;
+        float m_nearClip = 0.1f;
+        float m_farClip = 100.0f;
     };
+
+
 }

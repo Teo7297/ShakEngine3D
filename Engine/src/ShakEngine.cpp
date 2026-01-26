@@ -9,7 +9,7 @@
 
 #include "AssetManager.h"
 #include "SceneManager.h"
-#include "UIManager.h"
+#include "UI/UIManager.h"
 #include "Renderer.h"
 
 using namespace Shak;
@@ -98,6 +98,9 @@ void ShakEngine::Update()
 
     // Swap buffers
     SDL_CHECK(SDL_GL_SwapWindow(m_window));
+
+    // Terminate frame
+    m_renderer->FinishFrame();
 }
 
 void ShakEngine::InitSDL(const std::vector<AppMetadata>& metadata, const char* windowName, int winWidth, int winHeight, bool resizable, int syncType)

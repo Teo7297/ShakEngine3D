@@ -6,7 +6,7 @@
 #include "Renderer.h"
 #include "AssetManager.h"
 #include "SceneManager.h"
-#include "UIManager.h"
+#include "UI/UIManager.h"
 #include "interfaces/IRenderable.h"
 #include "interfaces/IAppControl.h"
 
@@ -103,6 +103,7 @@ void Scene::Update(Renderer* renderer, float deltaTime)
     renderer->Setup(m_mainCamera);
     for(auto* renderable : m_renderables)
         renderable->Draw(renderer);
+    m_appContext.uiManager->Render(renderer);
 }
 
 void Scene::ProcessEvent(SDL_Event event)

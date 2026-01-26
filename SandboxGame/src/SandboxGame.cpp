@@ -1,7 +1,7 @@
 #include <ShakEngine.h>
 
 #include <SceneManager.h>
-#include <UIManager.h>
+#include <UI/UIManager.h>
 #include <Renderer.h>
 #include <scenes/TestScene.h>
 

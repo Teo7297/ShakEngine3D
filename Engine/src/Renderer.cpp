@@ -9,6 +9,7 @@ Renderer::Renderer()
     , m_cameraSetThisFrame{ false }
 {
     m_sceneData.viewProjectionMatrix = glm::identity<glm::mat4>();
+    m_sceneData.UIProjectionMatrix = glm::identity<glm::mat4>();
     m_sceneData.cameraPosition = glm::vec3(0.f);
 }
 
@@ -24,6 +25,7 @@ void Renderer::Setup(CameraComponent* camera)
 
     // get camera data and set UBO for vp matrix
     m_sceneData.viewProjectionMatrix = camera->GetViewProjectionMatrix();
+    m_sceneData.UIProjectionMatrix = camera->GetUIProjectionMatrix();
     m_sceneData.cameraPosition = camera->GetOwner()->GetTransform()->GetPosition();
     m_cameraSetThisFrame = true;
     m_camera = camera;
@@ -34,6 +36,11 @@ void Renderer::Submit(RenderCommand command)
     m_renderQueue.emplace_back(std::move(command));
 }
 
+void Renderer::Submit(UIRenderCommand command)
+{
+    m_uiRenderQueue.emplace_back(std::move(command));
+}
+
 void Renderer::RenderScene()
 {
     GL_CHECK(glEnable(GL_DEPTH_TEST));
@@ -42,7 +49,7 @@ void Renderer::RenderScene()
     GL_CHECK(glClearColor(0.0, 0.3, 0.5, 1.0));
     GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    GL_CHECK(glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y));
+    GL_CHECK(glViewport(0, 0, 1920, 1080));
 
     if(!m_cameraSetThisFrame)
     {
@@ -120,10 +127,59 @@ void Renderer::RenderScene()
     }
 
     m_renderQueue.clear();
-    m_cameraSetThisFrame = false;
 }
+
 
 void Renderer::RenderUI()
 {
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    GL_CHECK(glDisable(GL_DEPTH_TEST));
+    GL_CHECK(glEnable(GL_CULL_FACE));
+    GL_CHECK(glCullFace(GL_BACK));
+
+    //TODO: get this from app context (also in RenderScene())
+    GL_CHECK(glViewport(0, 0, 1920, 1080));
+
+    if(!m_cameraSetThisFrame)
+    {
+        return;
+    }
+
+    MatrixBlock mvp =
+    {
+        .viewProjection = m_sceneData.UIProjectionMatrix // View = identity, proj = ortho
+    };
+
+    Shader* lastBoundShader = nullptr;
+
+    std::sort(m_uiRenderQueue.begin(), m_uiRenderQueue.end());
+
+    for(auto command : m_uiRenderQueue)
+    {
+        mvp.model = glm::translate(glm::mat4(1.0f), glm::vec3(command.screenCoords.x, command.screenCoords.y, 0.0f));
+
+        auto shader = command.material->GetShader();
+
+        if(shader != lastBoundShader)
+        {
+            shader->Bind();
+            shader->SetUniformInt(shader->GetUniformLocation("uTime"), SDL_GetTicks());
+        }
+        lastBoundShader = shader;
+
+        shader->SetMVP(mvp);
+        command.material->SetTextureUniforms();
+        command.material->SetInstanceSpecificUniforms();
+
+        command.material->BindTextures();
+        command.mesh->Bind();
+
+        GL_CHECK(glDrawElements(command.renderMode, command.mesh->GetIndicesCount(), GL_UNSIGNED_INT, 0));
+    }
+
+    m_uiRenderQueue.clear();
+}
+
+void Renderer::FinishFrame()
+{
+    m_cameraSetThisFrame = false;
 }

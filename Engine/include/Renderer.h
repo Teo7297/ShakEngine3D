@@ -26,9 +26,28 @@ namespace Shak
         }
     };
 
+    struct UIRenderCommand
+    {
+        Mesh* mesh;
+        Material* material;
+        glm::vec2 screenCoords;
+        // bool requestBatchRender;
+        GLint renderMode;
+
+        // Helper for sorting
+        bool operator<(const UIRenderCommand& other) const {
+            auto thisShader = material->GetShader();
+            auto otherShader = other.material->GetShader();
+            if(thisShader != otherShader)
+                return thisShader < otherShader; // Group by Shader first
+            return material < other.material; // Group by Material instance second
+        }
+    };
+
     struct SceneData
     {
         glm::mat4 viewProjectionMatrix;
+        glm::mat4 UIProjectionMatrix;
         glm::vec3 cameraPosition;
         // lights pos?
     };
@@ -40,11 +59,14 @@ namespace Shak
         ~Renderer();
         void Setup(CameraComponent* camera);
         void Submit(RenderCommand command);
+        void Submit(UIRenderCommand command);
         void RenderScene();
         void RenderUI();
+        void FinishFrame();
 
     private:
         std::vector<RenderCommand> m_renderQueue;
+        std::vector<UIRenderCommand> m_uiRenderQueue;
         SceneData m_sceneData;
         bool m_cameraSetThisFrame;
         CameraComponent* m_camera;
