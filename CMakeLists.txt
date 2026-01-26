@@ -15,4 +15,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Add the sub-projects
 add_subdirectory(Engine)
 add_subdirectory(Editor)
-# add_subdirectory(SandboxGame)
+add_subdirectory(SandboxGame)

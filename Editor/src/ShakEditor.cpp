@@ -35,7 +35,7 @@ int main()
     auto& ctx = engine.GetAppContext();
     ImGui::SetCurrentContext(ctx.imguiContext);
 
-    auto* sm = engine.GetAppContext().sceneManager;
+    auto* sm = ctx.sceneManager;
     sm->RegisterScene<TestScene>("1");
     sm->RegisterScene<TestScene>("2");
     sm->LoadScene("1");
@@ -66,7 +66,6 @@ int main()
                 ctx.sceneManager->GetActiveScene()->GetMainCamera()->SetViewportSize(event.window.data1, event.window.data2);
                 break;
             }
-
 
             ctx.sceneManager->ProcessEvent(event);
             ctx.uiManager->ProcessEvent(event);
