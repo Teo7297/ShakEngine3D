@@ -36,10 +36,10 @@ namespace Shak
         bool Link();
         bool IsLinked() { return m_program > 0; }
 
-        GLint GetUniformLocation(const std::string& name);
         void SetMVP(MatrixBlock matrices); // TODO: remove data copy
         void SetUniformFloat(GLuint loc, float value);
         void SetUniformInt(GLuint loc, int value);
+        void SetUniformColor(GLuint loc, const glm::vec4& color);
 
     private:
         Shader();

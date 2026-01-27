@@ -87,12 +87,11 @@ void Renderer::RenderScene()
         if(shader != lastBoundShader)
         {
             shader->Bind();
-            shader->SetUniformInt(shader->GetUniformLocation("uTime"), SDL_GetTicks());
+            // shader->SetUniformFloat(0, SDL_GetTicks());
         }
         lastBoundShader = shader;
 
         shader->SetMVP(mvp);
-        command.material->SetTextureUniforms();
         command.material->SetInstanceSpecificUniforms();
 
         command.material->BindTextures();
@@ -115,7 +114,7 @@ void Renderer::RenderScene()
         auto shader = skyboxRC.material->GetShader();
         shader->Bind();
         shader->SetMVP(mvp);
-        shader->SetUniformInt(shader->GetUniformLocation("uTexture"), 0);
+        // shader->SetUniformInt(0, 0); // not needed, it's always only 1 texture here
 
         skyboxRC.material->BindTextures();
 
@@ -162,12 +161,11 @@ void Renderer::RenderUI()
         if(shader != lastBoundShader)
         {
             shader->Bind();
-            shader->SetUniformInt(shader->GetUniformLocation("uTime"), SDL_GetTicks());
+            // shader->SetUniformFloat(0, (float)SDL_GetTicks());
         }
         lastBoundShader = shader;
 
         shader->SetMVP(mvp);
-        command.material->SetTextureUniforms();
         command.material->SetInstanceSpecificUniforms();
 
         command.material->BindTextures();

@@ -11,7 +11,8 @@ void UIManager::Update(float deltaTime)
 
 void UIManager::ProcessEvent(SDL_Event event)
 {
-
+    if(m_activeLayer)
+        m_activeLayer->ProcessEvent(event);
 }
 
 void UIManager::Render(Renderer* renderer)

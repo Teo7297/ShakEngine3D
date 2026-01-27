@@ -35,6 +35,12 @@ void UILayer::Update(float dt)
         widget->Update(dt);
 }
 
+void UILayer::ProcessEvent(SDL_Event event)
+{
+    for(const auto& [name, widget] : m_widgets)
+        widget->ProcessEvent(event);
+}
+
 void UILayer::Render(Renderer* renderer)
 {
     for(const auto& [name, widget] : m_widgets)

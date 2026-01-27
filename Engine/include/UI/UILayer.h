@@ -16,7 +16,8 @@ namespace Shak
         virtual void OnActivate();
         virtual void OnDeactivate();
         virtual void Update(float dt);
-        
+        virtual void ProcessEvent(SDL_Event event);
+
         void Render(Renderer* renderer);
 
         void SetName(const std::string& name);

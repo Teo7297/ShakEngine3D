@@ -2,7 +2,7 @@
 
 #include <UI/UIWIdget.h>
 #include <Mesh.h>
-#include <Material.h>
+#include "TestMaterial.h"
 #include <AssetManager.h>
 #include <Shader.h>
 
@@ -23,6 +23,22 @@ class TestWidget : public UIWidget
     {
         0, 1, 2, 0, 2, 3
     };
+
+    void Red()
+    {
+        ((TestMaterial*)m_material)->Color = glm::vec4(1.f, 0.f, 0.f, 1.f);
+    }
+
+    void Green()
+    {
+        ((TestMaterial*)m_material)->Color = glm::vec4(0.f, 1.f, 0.f, 1.f);
+    }
+
+    void Blue()
+    {
+        ((TestMaterial*)m_material)->Color = glm::vec4(0.f, 0.f, 1.f, 1.f);
+    }
+
 public:
     void Initialize() override
     {
@@ -37,10 +53,29 @@ public:
             shader->Link();
         }
 
-        m_material = new Material();
-        m_material->SetShader(shader);
+        auto* material = new TestMaterial();
+        material->Color = glm::vec4(0.0, 1.0, 0.0, 1.0);
+        material->SetShader(shader);
+        m_material = material;
 
         m_screenCoords = { 50.f, 50.f };
         m_active = true;
+    }
+
+    void ProcessEvent(SDL_Event event) override
+    {
+        switch(event.type)
+        {
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            Blue();
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            Red();
+            break;
+        case SDL_EVENT_MOUSE_MOTION:
+            break;
+        default:
+            break;
+        };
     }
 };

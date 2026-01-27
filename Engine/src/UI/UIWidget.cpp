@@ -23,6 +23,11 @@ void UIWidget::Update(float dt)
 
 }
 
+void UIWidget::ProcessEvent(SDL_Event event)
+{
+
+}
+
 void UIWidget::SetActive(bool flag)
 {
     m_active = flag;

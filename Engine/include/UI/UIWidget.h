@@ -15,6 +15,7 @@ namespace Shak
 
         virtual void Initialize();
         virtual void Update(float dt);
+        virtual void ProcessEvent(SDL_Event event);
 
         void SetActive(bool flag);
         bool IsActive();

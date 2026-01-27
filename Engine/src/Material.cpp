@@ -40,17 +40,6 @@ Shader* Material::GetShader() const
     return m_shader;
 }
 
-void Material::SetTextureUniforms()
-{
-    for(int slot = 0; slot < m_textures.size(); slot++)
-    {
-        std::string uniformName = "uTexture";
-        if(slot > 0)
-            uniformName.append(std::to_string(slot));
-        m_shader->SetUniformInt(m_shader->GetUniformLocation("uTexture"), 0);
-    }
-}
-
 void Material::BindTextures()
 {
     for(int slot = 0; slot < m_textures.size(); slot++)

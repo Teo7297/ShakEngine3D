@@ -13,9 +13,11 @@ namespace Shak
         ~Mesh();
         void Bind();
         int GetIndicesCount();
+        std::vector<float>& GetVertices() { return m_vertices; }
 
     private:
         void InitGLBuffers();
+        void ClearGLResources();
 
     private:
         std::vector<float> m_vertices;

@@ -14,18 +14,7 @@ Mesh::Mesh(std::vector<float> vertices, std::vector<GLuint> indices, bool hasCol
 
 Mesh::~Mesh()
 {
-    if(m_vao) {
-        GL_CHECK(glDeleteVertexArrays(1, &m_vao));
-        m_vao = 0u;
-    }
-    if(m_vbo) {
-        GL_CHECK(glDeleteBuffers(1, &m_vbo));
-        m_vbo = 0u;
-    }
-    if(m_ebo) {
-        GL_CHECK(glDeleteBuffers(1, &m_ebo));
-        m_ebo = 0u;
-    }
+    this->ClearGLResources();
 }
 
 void Mesh::Bind()
@@ -102,4 +91,20 @@ void Mesh::InitGLBuffers()
     GL_CHECK(glBindVertexArray(0));
     GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
     GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+}
+
+void Mesh::ClearGLResources()
+{
+    if(m_vao) {
+        GL_CHECK(glDeleteVertexArrays(1, &m_vao));
+        m_vao = 0u;
+    }
+    if(m_vbo) {
+        GL_CHECK(glDeleteBuffers(1, &m_vbo));
+        m_vbo = 0u;
+    }
+    if(m_ebo) {
+        GL_CHECK(glDeleteBuffers(1, &m_ebo));
+        m_ebo = 0u;
+    }
 }
